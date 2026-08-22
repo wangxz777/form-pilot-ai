@@ -4,9 +4,9 @@
 
 **目标：** 完成可编辑、可校验、可导入导出并能由真实百炼模型生成 Schema 的 Vue 3 动态表单作品。
 
-**架构：** Zod 是 Schema 事实源；Pinia 保存单份编辑草稿；Element Plus 字段渲染器在组件边界归一化动态值；Vercel Function 隔离 Mock/百炼 Provider 与服务端密钥。
+**架构：** Zod 是 Schema 事实源；Pinia 保存单份编辑草稿；Element Plus 字段渲染器在组件边界归一化动态值；CloudBase Node.js 20 HTTP 云函数隔离 Mock/百炼 Provider 与服务端密钥。
 
-**技术栈：** Vue 3、TypeScript、Vite、Element Plus、Vue Router、Pinia、Zod、vue-draggable-plus、Vitest、Vue Test Utils、Playwright、Vercel Functions、OpenAI Node SDK（百炼兼容模式）。
+**技术栈：** Vue 3、TypeScript、Vite、Element Plus、Vue Router、Pinia、Zod、vue-draggable-plus、Vitest、Vue Test Utils、Playwright、CloudBase 静态托管与 Node.js 20 HTTP 云函数、OpenAI Node SDK（百炼兼容模式）。
 
 ---
 
@@ -128,8 +128,9 @@
 **文件：**
 - 创建：`src/types/ai.ts`、`src/services/form-generator.ts`
 - 创建：`src/components/editor/AiGenerateDialog.vue`
-- 创建：`api/generate-form.ts`、`api/_lib/generate-form-handler.ts`、`api/_lib/providers.ts`
-- 创建：`api/_lib/generate-form-handler.test.ts`
+- 创建：`functions/generateForm/src/server.ts`、`functions/generateForm/src/generate-form-handler.ts`、`functions/generateForm/src/providers.ts`
+- 创建：`functions/generateForm/src/generate-form-handler.test.ts`
+- 创建：`functions/generateForm/package.json`、`functions/generateForm/tsconfig.json`、`functions/generateForm/scf_bootstrap`
 - 修改：`src/stores/form-editor.ts`、`src/components/editor/EditorToolbar.vue`
 - 修改：`package.json`、`pnpm-lock.yaml`、`tsconfig.node.json`
 
@@ -139,7 +140,7 @@
 
 - [ ] **步骤 2：实现稳定 API 契约与 Mock Provider**
 
-  `POST /api/generate-form` 接收 `{ prompt }`；返回计划规定的成功/失败结构，prompt 长度为 1～2000 个字符。
+  CloudBase HTTP 云函数暴露 `POST /generate-form`，接收 `{ prompt }`；返回计划规定的成功/失败结构，prompt 长度为 1～2000 个字符。HTTP 层按 `ALLOWED_ORIGINS` 处理 CORS，业务 handler 保持与平台无关。
 
 - [ ] **步骤 3：实现百炼 Provider**
 
@@ -147,18 +148,18 @@
 
 - [ ] **步骤 4：实现 AI 对话框和客户端状态**
 
-  支持 Mock/真实来源标识、loading、取消、显式重试、错误提示和“确认后应用”；失败时不改变草稿。
+  客户端从 `VITE_API_BASE_URL` 读取公开函数地址，支持 Mock/真实来源标识、loading、取消、显式重试、错误提示和“确认后应用”；失败时不改变草稿。
 
 - [ ] **步骤 5：验证并提交**
 
-  运行：`pnpm test`、`pnpm build`。无凭据时验证 Mock；有凭据时对真实环境执行三条人工烟测。
+  运行：`pnpm test`、`pnpm build`、`pnpm build:function`。无凭据时验证 Mock；有凭据时对真实 CloudBase 环境执行三条人工烟测。
 
 ### 任务 6：完成 E2E、部署配置与作品交付
 
 **文件：**
 - 创建：`playwright.config.ts`
 - 创建：`e2e/editor.spec.ts`、`e2e/form.spec.ts`、`e2e/ai.spec.ts`、`e2e/import-export.spec.ts`
-- 创建：`vercel.json`、`.env.example`
+- 创建：`cloudbaserc.json`、`.env.example`
 - 修改：`package.json`、`pnpm-lock.yaml`、`README.md`
 - 修改：`docs/PROJECT_CONTEXT.md`、`docs/DAILY_LOG.md`
 
@@ -166,7 +167,9 @@
 
   覆盖编辑排序、填写校验、Mock AI 生成应用、导出后导入；运行确认至少因尚缺定位/配置而失败。
 
-- [ ] **步骤 2：补齐稳定选择器和 Vercel SPA/API 配置**
+- [ ] **步骤 2：补齐稳定选择器和 CloudBase SPA/云函数配置**
+
+  `cloudbaserc.json` 使用 `{{env.TCB_ENV_ID}}` 选择环境，静态应用构建命令为 `pnpm build`、输出目录为 `dist`；`generateForm` 配置为 Nodejs20.19 HTTP 云函数，超时 60 秒。密钥不写入配置文件。
 - [ ] **步骤 3：完成 README、环境变量示例和部署说明**
 
   README 必须如实区分公开 Mock 与受保护真实环境，包含架构、数据流、安全、命令、测试和项目取舍。
@@ -177,5 +180,4 @@
 
 - [ ] **步骤 5：部署与证据记录**
 
-  若 Vercel 已登录则部署公开 Mock 和受保护真实 Preview；否则记录精确阻塞和可直接执行的部署命令。更新每日记录时只写实际命令与结果，不编造理解或真实 AI 成功。
-
+  若 CloudBase CLI 已登录且存在两个环境，则分别部署公开 Mock 与受控真实环境；否则记录精确阻塞和可直接执行的 `tcb app deploy`、`tcb fn deploy generateForm --httpFn` 命令。更新每日记录时只写实际命令与结果，不编造理解或真实 AI 成功。
