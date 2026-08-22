@@ -5,7 +5,7 @@ export function getDefaultValue(field: FormField): string | number | boolean | u
     case 'text':
       return ''
     case 'number':
-      return 0
+      return undefined
     case 'select':
       return undefined
     case 'textarea':

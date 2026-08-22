@@ -1,6 +1,7 @@
 import type { FormSchema } from '@/types/form-schema'
 
 export const jobApplicationSchema: FormSchema = {
+  schemaVersion: 1,
   id: 'job-application',
   title: 'Job Application Form',
   fields: [

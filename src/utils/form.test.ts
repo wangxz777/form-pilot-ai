@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { validateField, validateForm, getDefaultValue, getFieldSummary } from './form'
+import { jobApplicationSchema } from '@/data/job-application-schema'
 import type {
   TextField,
   NumberField,
@@ -11,13 +12,11 @@ import type {
   TextareaField,
   FormSchema,
 } from '@/types/form-schema'
+import { FormSchemaSchema } from '@/types/form-schema'
 describe('getDefaultValue', () => {
   it('各类型Field默认值', () => {
     const textField: TextField = { id: 'field1', label: 'Field 1', type: 'text' }
     expect(getDefaultValue(textField)).toBe('')
-
-    const numberField: NumberField = { id: 'field2', label: 'Field 2', type: 'number' }
-    expect(getDefaultValue(numberField)).toBe(0)
 
     const selectField: SelectField = {
       id: 'field3',
@@ -54,6 +53,12 @@ describe('getDefaultValue', () => {
     }
     expect(getDefaultValue(TextareaField)).toBe('')
   })
+
+  it('number 默认值为 undefined，防止空输入被误当作 0', () => {
+    const numberField: NumberField = { id: 'field2', label: 'Field 2', type: 'number' }
+
+    expect(getDefaultValue(numberField)).toBeUndefined()
+  })
 })
 
 describe('getFieldSummary', () => {
@@ -77,6 +82,7 @@ describe('getFieldSummary', () => {
 describe('validateForm', () => {
   it('验证表单', () => {
     const schema: FormSchema = {
+      schemaVersion: 1,
       id: 'job-application',
       title: 'Job Application',
       fields: [
@@ -108,6 +114,48 @@ describe('validateForm', () => {
       age: '年龄 不能小于 18',
       position: '应聘岗位 为必填项',
     })
+  })
+})
+
+describe('FormSchemaSchema', () => {
+  it('可解析静态求职表单 schema，防止其结构漂移', () => {
+    expect(FormSchemaSchema.safeParse(jobApplicationSchema).success).toBe(true)
+  })
+
+  it('拒绝重复字段 ID，防止表单值互相覆盖', () => {
+    const schema = {
+      schemaVersion: 1,
+      id: 'duplicate-id',
+      title: 'Duplicate ID',
+      fields: [
+        { id: 'name', label: '姓名', type: 'text' },
+        { id: 'name', label: '另一个姓名', type: 'text' },
+      ],
+    }
+
+    expect(FormSchemaSchema.safeParse(schema).success).toBe(false)
+  })
+
+  it('拒绝没有选项的 select，防止无法选择的字段进入渲染器', () => {
+    const schema = {
+      schemaVersion: 1,
+      id: 'empty-options',
+      title: 'Empty options',
+      fields: [{ id: 'position', label: '岗位', type: 'select', options: [] }],
+    }
+
+    expect(FormSchemaSchema.safeParse(schema).success).toBe(false)
+  })
+
+  it('拒绝反向 number min/max，防止不可能满足的范围进入渲染器', () => {
+    const schema = {
+      schemaVersion: 1,
+      id: 'inverted-range',
+      title: 'Inverted range',
+      fields: [{ id: 'age', label: '年龄', type: 'number', min: 120, max: 0 }],
+    }
+
+    expect(FormSchemaSchema.safeParse(schema).success).toBe(false)
   })
 })
 
