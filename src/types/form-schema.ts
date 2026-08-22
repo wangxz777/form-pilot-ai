@@ -29,7 +29,34 @@ export interface SelectField extends BaseField {
   options: SelectOption[]
 }
 
-export type FormField = TextField | NumberField | SelectField
+export interface TextareaField extends BaseField {
+  type: 'textarea'
+  placeholder?: string
+  minLength?: number
+  maxLength?: number
+}
+
+export interface RadioField extends BaseField {
+  type: 'radio'
+  options: SelectOption[]
+}
+
+export interface CheckboxField extends BaseField {
+  type: 'checkbox'
+}
+
+export interface DateField extends BaseField {
+  type: 'date'
+}
+
+export type FormField =
+  | TextField
+  | NumberField
+  | SelectField
+  | TextareaField
+  | RadioField
+  | CheckboxField
+  | DateField
 
 export type FieldType = FormField['type']
 
