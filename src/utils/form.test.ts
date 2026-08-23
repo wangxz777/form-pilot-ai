@@ -157,6 +157,17 @@ describe('FormSchemaSchema', () => {
 
     expect(FormSchemaSchema.safeParse(schema).success).toBe(false)
   })
+
+  it('拒绝反向 text minLength/maxLength，防止不可能满足的长度范围进入渲染器', () => {
+    const schema = {
+      schemaVersion: 1,
+      id: 'inverted-text-length',
+      title: 'Inverted text length',
+      fields: [{ id: 'name', label: '姓名', type: 'text', minLength: 10, maxLength: 2 }],
+    }
+
+    expect(FormSchemaSchema.safeParse(schema).success).toBe(false)
+  })
 })
 
 describe('validateField', () => {
