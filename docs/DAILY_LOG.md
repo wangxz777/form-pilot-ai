@@ -66,6 +66,40 @@
 
 ---
 
+## Day 3 — 2026-08-23
+
+### 今日目标
+
+- 将前两天的业务实现清空，以新的学习方式重新开始。
+- 参考 `docs/ui` 先搭建可导航的前端整体骨架。
+- 明确由学习者主导核心模块实现，Codex 负责指引、审查和验证。
+
+### 完成情况
+
+- 清空旧表单页面，并删除旧 Schema、示例数据、表单工具和测试文件；这些删除当前尚未提交。
+- 接入 Vue Router、Pinia 和 Element Plus，完成 `/` 首页与 `/editor` 编辑器路由。
+- 编辑器页已具备参考 UI 的顶部工具栏、字段区、实时预览区、属性区和窄屏单列布局；未实现 Store、Schema、字段渲染、弹窗或 AI 业务。
+- 新增前端薄骨架设计和实施计划；骨架提交为 `7479c56 feat: build frontend app shell`。
+
+### 验证结果
+
+- 修改文件：`src/main.ts`、`src/App.vue`、`src/router/index.ts`、`src/views/HomeView.vue`、`src/views/EditorView.vue`、`src/styles/main.css`、依赖清单及锁文件。
+- `pnpm build` 成功：Vite 转换 1593 个模块并产出 `dist`；Element Plus 整体引入触发单个 JS chunk 超过 500 kB 的非阻断警告。
+- 学习者已自行审查页面；Codex 的后续浏览器视觉复验按学习者要求跳过。
+- Git 提交：`c9b56ca docs: define frontend app shell design`、`7479c56 feat: build frontend app shell`。
+
+### 学习与问题
+
+- 已确定后续协作方式：学习者负责核心类型、组件和状态逻辑，Codex 默认不代写业务代码。
+- 今天的框架代码由 Codex 执行，学习者对入口注册、Router 数据流和三栏 CSS 的理解尚未通过复述确认。
+- `@vue/test-utils`、`jsdom` 当前尚未使用；包体拆分留到出现真实性能需求时处理。
+
+### 明日第一步
+
+- 由学习者从零设计第一版 Zod 表单 Schema，运行时 Schema 使用小驼峰命名，TypeScript 类型使用大驼峰命名。
+
+---
+
 ## 后续每日记录模板
 
 ## Day N — YYYY-MM-DD
