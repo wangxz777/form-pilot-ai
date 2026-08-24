@@ -28,13 +28,7 @@
         <p class="panel-empty-state">暂未添加字段</p>
       </aside>
 
-      <main class="preview-panel" aria-labelledby="preview-title">
-        <h2 id="preview-title">实时预览</h2>
-        <section class="form-canvas" aria-labelledby="form-title">
-          <h3 id="form-title">求职申请表</h3>
-          <p>暂未添加字段</p>
-        </section>
-      </main>
+      <PreviewPanel :formSchema="formSchema" :formValues="formValues" />
 
       <aside class="editor-panel property-panel" aria-labelledby="property-title">
         <h2 id="property-title">字段属性</h2>
@@ -43,3 +37,15 @@
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { reactive } from 'vue'
+import PreviewPanel from './PreviewPanel.vue'
+
+import { jobApplicationSchema } from '@/data/job-application-schema.ts'
+import { createFormValues } from '@/utils/form-values'
+import type { FormSchema } from '@/types/form-schema.ts'
+
+const formSchema = reactive<FormSchema>(jobApplicationSchema)
+const formValues = reactive(createFormValues(formSchema.fields))
+</script>
