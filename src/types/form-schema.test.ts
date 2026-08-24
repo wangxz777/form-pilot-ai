@@ -1,217 +1,179 @@
-import { describe, it, expect } from 'vitest'
-import { formSchema, textFieldSchema, numberFieldSchema } from './form-schema'
+import { describe, expect, it } from 'vitest'
+import {
+  formSchema,
+  numberFieldSchema,
+  radioFieldSchema,
+  selectFieldSchema,
+  textFieldSchema,
+  textareaFieldSchema,
+} from './form-schema'
 
 describe('textFieldSchema', () => {
-  it('验证文字表单', () => {
-    const result = textFieldSchema.safeParse({
-      id: '1',
-      label: 'Name',
-      type: 'text',
-      required: true,
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('验证minLength和maxLength', () => {
-    const result = textFieldSchema.safeParse({
-      id: '1',
-      label: 'Name',
-      type: 'text',
-      minLength: 5,
-      maxLength: 3,
-    })
-
-    const result2 = textFieldSchema.safeParse({
-      id: '1',
+  it('验证文本长度范围', () => {
+    const valid = textFieldSchema.safeParse({
+      id: 'name',
       label: 'Name',
       type: 'text',
       minLength: 3,
-      maxLength: 5,
+      maxLength: 20,
     })
-
-    const result3 = textFieldSchema.safeParse({
-      id: '1',
+    const reversed = textFieldSchema.safeParse({
+      id: 'name',
+      label: 'Name',
+      type: 'text',
+      minLength: 20,
+      maxLength: 3,
+    })
+    const invalidLength = textFieldSchema.safeParse({
+      id: 'name',
       label: 'Name',
       type: 'text',
       minLength: -1,
-      maxLength: 5,
-    })
-
-    const result4 = textFieldSchema.safeParse({
-      id: '1',
-      label: 'Name',
-      type: 'text',
-      minLength: 1,
       maxLength: 1.5,
     })
 
-    expect(result.success).toBe(false)
-    expect(result2.success).toBe(true)
-    expect(result3.success).toBe(false)
-    expect(result4.success).toBe(false)
+    expect(valid.success).toBe(true)
+    expect(reversed.success).toBe(false)
+    expect(invalidLength.success).toBe(false)
+  })
+})
+
+describe('textareaFieldSchema', () => {
+  it('验证多行文本长度范围', () => {
+    const valid = textareaFieldSchema.safeParse({
+      id: 'description',
+      label: 'Description',
+      type: 'textarea',
+      minLength: 10,
+      maxLength: 200,
+    })
+    const invalid = textareaFieldSchema.safeParse({
+      id: 'description',
+      label: 'Description',
+      type: 'textarea',
+      minLength: 200,
+      maxLength: 10,
+    })
+
+    expect(valid.success).toBe(true)
+    expect(invalid.success).toBe(false)
   })
 })
 
 describe('numberFieldSchema', () => {
-  it('验证数字表单', () => {
-    const result = numberFieldSchema.safeParse({
-      id: '1',
+  it('验证数字范围', () => {
+    const valid = numberFieldSchema.safeParse({
+      id: 'age',
       label: 'Age',
       type: 'number',
-      required: true,
+      min: 18,
+      max: 65,
     })
-    expect(result.success).toBe(true)
-  })
-
-  it('验证min和max', () => {
-    const result = numberFieldSchema.safeParse({
-      id: '1',
+    const reversed = numberFieldSchema.safeParse({
+      id: 'age',
       label: 'Age',
       type: 'number',
-      min: 5,
-      max: 3,
+      min: 65,
+      max: 18,
     })
-
-    const result2 = numberFieldSchema.safeParse({
-      id: '1',
+    const infinite = numberFieldSchema.safeParse({
+      id: 'age',
       label: 'Age',
       type: 'number',
-      min: 3,
-      max: 5,
-    })
-
-    const result3 = numberFieldSchema.safeParse({
-      id: '1',
-      label: 'Age',
-      type: 'number',
-      min: 1,
       max: Number.POSITIVE_INFINITY,
     })
 
-    expect(result.success).toBe(false)
-    expect(result2.success).toBe(true)
-    expect(result3.success).toBe(false)
+    expect(valid.success).toBe(true)
+    expect(reversed.success).toBe(false)
+    expect(infinite.success).toBe(false)
+  })
+})
+
+describe('option field schemas', () => {
+  it('验证 select 和 radio 的选项约束', () => {
+    const validSelect = selectFieldSchema.safeParse({
+      id: 'department',
+      label: 'Department',
+      type: 'select',
+      options: [{ label: 'Engineering', value: 'engineering' }],
+    })
+    const emptySelect = selectFieldSchema.safeParse({
+      id: 'department',
+      label: 'Department',
+      type: 'select',
+      options: [],
+    })
+    const validRadio = radioFieldSchema.safeParse({
+      id: 'employment-type',
+      label: 'Employment Type',
+      type: 'radio',
+      options: [{ label: 'Full-time', value: 'full-time' }],
+    })
+    const blankRadioOption = radioFieldSchema.safeParse({
+      id: 'employment-type',
+      label: 'Employment Type',
+      type: 'radio',
+      options: [{ label: 'Full-time', value: '   ' }],
+    })
+
+    expect(validSelect.success).toBe(true)
+    expect(emptySelect.success).toBe(false)
+    expect(validRadio.success).toBe(true)
+    expect(blankRadioOption.success).toBe(false)
   })
 })
 
 describe('formSchema', () => {
-  it('验证schemaVersion', () => {
-    const result = formSchema.safeParse({
-      schemaVersion: '1',
-      title: 'Sample Form',
-      fields: [
-        {
-          id: '1',
-          label: 'Name',
-          type: 'text',
-          required: true,
-        },
-        {
-          id: '2',
-          label: 'Age',
-          type: 'number',
-          required: false,
-        },
-      ],
-    })
-    expect(result.success).toBe(false)
-  })
-
-  it('验证text，number类型', () => {
-    const result = formSchema.safeParse({
+  it('验证整表核心契约', () => {
+    const validForm = formSchema.safeParse({
       schemaVersion: 1,
       title: 'Sample Form',
       fields: [
+        { id: '1', label: 'Name', type: 'text' },
+        { id: '2', label: 'Age', type: 'number' },
+        { id: '3', label: 'Description', type: 'textarea' },
+        { id: '4', label: 'Agreement', type: 'checkbox' },
+        { id: '5', label: 'Start Date', type: 'date' },
         {
-          id: '1',
-          label: 'Name',
-          type: 'text',
-          required: true,
+          id: '6',
+          label: 'Department',
+          type: 'select',
+          options: [{ label: 'Engineering', value: 'engineering' }],
         },
         {
-          id: '2',
-          label: 'Age',
-          type: 'number',
-          required: false,
+          id: '7',
+          label: 'Employment Type',
+          type: 'radio',
+          options: [{ label: 'Full-time', value: 'full-time' }],
         },
       ],
     })
-    expect(result.success).toBe(true)
-  })
-
-  it('字段 ID 唯一时验证成功', () => {
-    const result = formSchema.safeParse({
+    const emptyForm = formSchema.safeParse({ schemaVersion: 1, title: 'Empty Form', fields: [] })
+    const wrongVersion = formSchema.safeParse({ schemaVersion: '1', title: 'Form', fields: [] })
+    const missingFields = formSchema.safeParse({ schemaVersion: 1, title: 'Form' })
+    const unsupportedField = formSchema.safeParse({
       schemaVersion: 1,
-      title: 'Sample Form',
-      fields: [
-        {
-          id: 'name',
-          label: 'Name',
-          type: 'text',
-        },
-        {
-          id: 'age',
-          label: 'Age',
-          type: 'number',
-        },
-      ],
+      title: 'Form',
+      fields: [{ id: '1', label: 'Unknown', type: 'unsupported' }],
     })
-
-    expect(result.success).toBe(true)
-  })
-
-  it('字段 ID 重复时验证失败并定位重复字段', () => {
-    const result = formSchema.safeParse({
+    const duplicateId = formSchema.safeParse({
       schemaVersion: 1,
-      title: 'Sample Form',
+      title: 'Form',
       fields: [
-        {
-          id: 'contact',
-          label: 'Name',
-          type: 'text',
-        },
-        {
-          id: 'contact',
-          label: 'Age',
-          type: 'number',
-        },
+        { id: 'contact', label: 'Name', type: 'text' },
+        { id: 'contact', label: 'Age', type: 'number' },
       ],
     })
 
-    expect(result.success).toBe(false)
+    expect(validForm.success).toBe(true)
+    expect(emptyForm.success).toBe(true)
+    expect(wrongVersion.success).toBe(false)
+    expect(missingFields.success).toBe(false)
+    expect(unsupportedField.success).toBe(false)
+    expect(duplicateId.success).toBe(false)
 
-    if (!result.success) {
-      expect(result.error.issues[0]?.path).toEqual(['fields', 1, 'id'])
+    if (!duplicateId.success) {
+      expect(duplicateId.error.issues[0]?.path).toEqual(['fields', 1, 'id'])
     }
-  })
-
-  it('验证fields字段', () => {
-    const result = formSchema.safeParse({
-      schemaVersion: 1,
-      title: 'Sample Form',
-      fields: [
-        {
-          id: '1',
-          label: 'Name',
-          type: 'textarea',
-          required: true,
-        },
-      ],
-    })
-
-    const result2 = formSchema.safeParse({
-      schemaVersion: 1,
-      title: 'Sample Form',
-      fields: [],
-    })
-
-    const result3 = formSchema.safeParse({
-      schemaVersion: 1,
-      title: 'Sample Form',
-    })
-
-    expect(result.success).toBe(false)
-    expect(result2.success).toBe(true)
-    expect(result3.success).toBe(false)
   })
 })
