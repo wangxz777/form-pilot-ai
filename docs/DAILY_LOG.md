@@ -73,6 +73,9 @@
 - 将前两天的业务实现清空，以新的学习方式重新开始。
 - 参考 `docs/ui` 先搭建可导航的前端整体骨架。
 - 明确由学习者主导核心模块实现，Codex 负责指引、审查和验证。
+- 从空白重新定义第一版 Zod 表单 Schema。
+- 建立 text、number 字段约束、表单版本约束和字段 ID 唯一性校验。
+- 扩展 checkbox、date 字段并用运行时测试验证数据契约。
 
 ### 完成情况
 
@@ -80,23 +83,36 @@
 - 接入 Vue Router、Pinia 和 Element Plus，完成 `/` 首页与 `/editor` 编辑器路由。
 - 编辑器页已具备参考 UI 的顶部工具栏、字段区、实时预览区、属性区和窄屏单列布局；未实现 Store、Schema、字段渲染、弹窗或 AI 业务。
 - 新增前端薄骨架设计和实施计划；骨架提交为 `7479c56 feat: build frontend app shell`。
+- 使用 `z.literal(1)` 固定 V1 版本，并通过 `z.discriminatedUnion` 建立 text、number 字段联合类型。
+- 为文本长度和数字范围增加可选边界及 min/max 关系校验；为根表单增加字段 ID 唯一性检查和具体错误路径。
+- 从 Zod Schema 通过 `z.infer` 导出 TypeScript 类型，没有使用 `any` 或类型断言。
+- 完成 text、number、textarea、select、radio、checkbox、date 七类字段 Schema，并修正 checkbox 与 date 的提前设计。
+- 完成统一动态 `FormFieldRenderer` 及七个字段子组件；各子组件使用 computed 将宽联合 `FormValue` 适配为控件需要的 string、number、boolean 或 option string。
+- 将测试收缩为 5 个高价值用例，不再为基础字段保留重复测试。
 
 ### 验证结果
 
 - 修改文件：`src/main.ts`、`src/App.vue`、`src/router/index.ts`、`src/views/HomeView.vue`、`src/views/EditorView.vue`、`src/styles/main.css`、依赖清单及锁文件。
 - `pnpm build` 成功：Vite 转换 1593 个模块并产出 `dist`；Element Plus 整体引入触发单个 JS chunk 超过 500 kB 的非阻断警告。
 - 学习者已自行审查页面；Codex 的后续浏览器视觉复验按学习者要求跳过。
-- Git 提交：`c9b56ca docs: define frontend app shell design`、`7479c56 feat: build frontend app shell`。
+- Schema 修改文件：`src/types/form-schema.ts`、`src/types/form-schema.test.ts`。
+- `pnpm test`：5 个测试全部通过。
+- `vue-tsc -b` 与 Vite 生产构建成功；七类动态渲染组件通过类型检查。
+- `git diff --check`：通过。
+- Git 提交：`c9b56ca docs: define frontend app shell design`、`7479c56 feat: build frontend app shell`、`9836bfa feat: define initial form schema`、`5e95a57 feat: support seven form field schemas`；字段渲染器将在验证后提交。
 
 ### 学习与问题
 
 - 已确定后续协作方式：学习者负责核心类型、组件和状态逻辑，Codex 默认不代写业务代码。
 - 今天的框架代码由 Codex 执行，学习者对入口注册、Router 数据流和三栏 CSS 的理解尚未通过复述确认。
 - `@vue/test-utils`、`jsdom` 当前尚未使用；包体拆分留到出现真实性能需求时处理。
+- 已确认理解：`z.literal(1)` 同时约束运行时值和推导类型；空数组与可选属性含义不同；`superRefine` 可以读取整个表单并添加多条、可定位路径的错误。
+- 仍需巩固：字段配置 Schema 与填写值类型的职责边界；不要为尚未进入范围的能力提前增加字段。
+- 关键问题与结论：动态组件父层负责分发，子组件内部通过 computed 完成精确值类型适配；类型检查和构建通过不能代替业务契约测试。
 
 ### 明日第一步
 
-- 由学习者从零设计第一版 Zod 表单 Schema，运行时 Schema 使用小驼峰命名，TypeScript 类型使用大驼峰命名。
+- 实现表单默认值纯函数，再将七类字段渲染器接入 `EditorView` 的静态预览。
 
 ---
 

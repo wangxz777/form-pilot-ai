@@ -148,3 +148,5 @@ export type FormSchema = z.infer<typeof formSchema>
  * 用于表单字段的类型定义
  */
 export type FormField = z.infer<typeof formFieldSchema>
+
+export type FormValue = string | number | boolean | undefined
