@@ -8,6 +8,8 @@
 
 **技术栈：** Vue 3、TypeScript、Vite、Element Plus、Vue Router、Pinia、Zod、vue-draggable-plus、Vitest、Vue Test Utils、Playwright、CloudBase 静态托管与 Node.js 20 HTTP 云函数、OpenAI Node SDK（百炼兼容模式）。
 
+**当前进度：** 15%（截至 2026-08-24）。应用骨架、Zod Schema 和七类字段渲染器已完成；静态预览集成处于未提交断点，尚未通过 UI 审查。
+
 ---
 
 ## 全局约束
@@ -15,7 +17,8 @@
 - 只实现设计文档列出的 V1；不增加历史、模板、登录、数据库或 AI 定点修改。
 - 不使用 `any` 或无法说明理由的类型断言。
 - 新依赖在首次使用它的任务中安装，不预建空壳业务文件。
-- 核心行为遵循 TDD；测试只覆盖真实且高价值的行为，不追求覆盖率数字。
+- 学习者主导核心类型、组件数据流和状态逻辑；Codex 负责指引、审查和验证，除非学习者明确要求实现。
+- 测试只覆盖真实且高价值的契约与流程；基础字段行为不重复补用例，不追求覆盖率数字。
 - 每个任务结束时运行相关测试和 `pnpm build`；任务 1 允许保留计划内、由任务 2 修复的现有 TS2322。
 - 每个任务独立提交，不修改无关代码。
 
@@ -23,58 +26,58 @@
 
 **文件：**
 - 修改：`src/types/form-schema.ts`
-- 修改：`src/data/job-application-schema.ts`
-- 修改：`src/utils/form.ts`
-- 修改：`src/utils/form.test.ts`
+- 创建：`src/types/form-schema.test.ts`
+- 创建：`src/data/job-application-schema.ts`
+- 创建：`src/utils/form-values.ts`
 - 修改：`package.json`、`pnpm-lock.yaml`
 
-- [ ] **步骤 1：安装 Zod，并先为新契约编写失败测试**
+- [x] **步骤 1：安装 Zod，并为核心契约编写测试**
 
-  测试必须证明 number 默认值是 `undefined`，合法静态 Schema 可解析，重复字段 ID、空 options、反向 min/max 会被拒绝。每条测试点名一个具体破坏。
+  当前保留 5 个高价值测试，覆盖文本/多行文本长度、数字范围、选项约束，以及整表版本、字段联合和重复字段 ID。
 
-- [ ] **步骤 2：运行定向测试并确认因契约尚未实现而失败**
+- [x] **步骤 2：运行 Schema 定向测试**
 
-  运行：`pnpm test src/utils/form.test.ts`
+  运行：`pnpm test src/types/form-schema.test.ts`
 
-- [ ] **步骤 3：用 Zod 可辨识联合重建七类字段和 FormSchema**
+- [x] **步骤 3：用 Zod 可辨识联合重建七类字段和 FormSchema**
 
   导出运行时 Schema 与 `z.infer` 类型；增加 `schemaVersion: 1` 和跨字段语义校验，保留现有公开类型名称。
 
-- [ ] **步骤 4：更新静态 Schema 和默认值实现**
+- [x] **步骤 4：创建静态 Schema 和默认值实现**
 
-  静态求职 Schema 增加版本；number 默认值改为 `undefined`，其余默认值遵循设计文档。
+  静态求职 Schema 覆盖七类字段并使用 `satisfies FormSchema`；number 默认值为 `undefined`，checkbox 为 `false`，其余类型为空字符串。
 
-- [ ] **步骤 5：验证并提交**
+- [x] **步骤 5：验证 Schema 与字段渲染器基线**
 
-  运行：`pnpm test src/utils/form.test.ts`、`pnpm test`。`pnpm build` 应只保留现有 textarea TS2322。
+  `pnpm test` 为 5/5 通过，`pnpm build` 通过，TS2322 已消失。Schema 与字段渲染器提交分别为 `9836bfa`、`5e95a57`、`1bf9dac`。
 
 ### 任务 2：搭建可运行应用骨架与字段渲染器
 
 **文件：**
 - 修改：`src/main.ts`、`src/App.vue`
 - 创建：`src/router/index.ts`
-- 创建：`src/views/HomeView.vue`、`src/views/EditorView.vue`
-- 创建：`src/components/FormFieldRenderer.vue`、`src/components/FormRenderer.vue`
-- 创建：`src/components/FormFieldRenderer.test.ts`
-- 创建：`src/styles/main.css`
+- 创建：`src/views/HomeView.vue`、`src/views/EditorView/EditorView.vue`、`src/views/EditorView/PreviewPanel.vue`
+- 创建：`src/components/formRenderer/FormFieldRenderer.vue`
+- 创建：`src/components/formRenderer/components/{Text,Number,Textarea,Select,Radio,Checkbox,Date}.vue`
+- 创建：`src/styles/main.scss`
 - 修改：`package.json`、`pnpm-lock.yaml`、`vite.config.ts`
 
-- [ ] **步骤 1：安装 Vue Router、Pinia、Element Plus、Vue Test Utils 与 jsdom**
-- [ ] **步骤 2：先写字段值适配测试并确认失败**
+- [x] **步骤 1：安装 Vue Router、Pinia、Element Plus、Vue Test Utils、jsdom 与 Sass**
+- [x] **步骤 2：实现字段值适配边界**
 
-  用真实组件分别验证 string、number、boolean、option 四类 `update:modelValue` 行为；这些测试应能抓住把适配器错误地共用为宽联合值的回归。
+  七个子组件使用 string、number、boolean、option string 四类 computed 适配器，不为基础控件重复添加组件测试。
 
-- [ ] **步骤 3：实现 Router、应用入口和两个页面骨架**
+- [x] **步骤 3：实现 Router、应用入口和两个页面骨架**
 
   `/` 提供项目说明和编辑器入口；`/editor` 提供三栏可运行骨架，暂不创建未来功能空文件。
 
-- [ ] **步骤 4：实现字段与整表渲染组件**
+- [x] **步骤 4：实现统一字段渲染器**
 
-  `FormFieldRenderer` 接收 `field`、`modelValue`、`error`，发出 `update:modelValue`；内部使用四类 computed 适配器。`FormRenderer` 初始化值、执行现有校验并展示提交结果。
+  `FormFieldRenderer` 负责动态分发七类字段组件；每个子组件通过 computed 将宽联合 `FormValue` 适配为控件值。字段渲染器已提交并推送。
 
-- [ ] **步骤 5：验证并提交**
+- [ ] **步骤 5：完成静态预览集成并提交**
 
-  运行：`pnpm test`、`pnpm build`。TS2322 必须消失，七类字段全部可渲染。
+  当前已接入静态求职 Schema 和默认值，但仍需用 `el-form-item` 显示字段标签与 required 状态，将标题、字段数量和空状态改为 Schema 驱动，并验证输入交互。完成后运行 `pnpm test`、`pnpm build`、`git diff --check`。
 
 ### 任务 3：实现三栏 Schema 编辑器和单份草稿
 
@@ -82,7 +85,7 @@
 - 创建：`src/stores/form-editor.ts`、`src/stores/form-editor.test.ts`
 - 创建：`src/repositories/draft-repository.ts`、`src/repositories/draft-repository.test.ts`
 - 创建：`src/components/editor/FieldList.vue`、`FieldPalette.vue`、`FieldProperties.vue`
-- 修改：`src/views/EditorView.vue`、`src/styles/main.css`
+- 修改：`src/views/EditorView/EditorView.vue`、`src/views/EditorView/PreviewPanel.vue`、`src/styles/main.scss`
 - 修改：`package.json`、`pnpm-lock.yaml`
 
 - [ ] **步骤 1：安装 vue-draggable-plus，并先写 store/仓储失败测试**
@@ -107,7 +110,7 @@
 **文件：**
 - 创建：`src/utils/schema-file.ts`、`src/utils/schema-file.test.ts`
 - 创建：`src/components/editor/EditorToolbar.vue`
-- 修改：`src/components/FormRenderer.vue`、`src/views/EditorView.vue`、`src/views/HomeView.vue`、`src/styles/main.css`
+- 修改：`src/views/EditorView/PreviewPanel.vue`、`src/views/EditorView/EditorView.vue`、`src/views/HomeView.vue`、`src/styles/main.scss`
 
 - [ ] **步骤 1：先写 JSON 解析、校验和导出命名失败测试**
 - [ ] **步骤 2：实现导入解析与导出下载数据构建**

@@ -1,5 +1,11 @@
 # FormPilot AI 每日学习记录
 
+## 当前总体进度
+
+**15%**（截至 2026-08-24）
+
+已完成应用骨架、Zod Schema 和七类字段渲染器；静态预览正在集成，字段编辑、校验、草稿、导入导出、真实 AI 和部署尚未开始。该百分比按六周 V1 里程碑估算，每天总结时根据实际验收结果更新。
+
 ## 使用方法
 
 每天学习结束后，由 Codex 检查实际改动和命令结果，再更新当天总结。只记录有代码、命令结果或学习者复述支持的事实；没有证据的完成、测试或理解不写入记录。
@@ -89,6 +95,8 @@
 - 完成 text、number、textarea、select、radio、checkbox、date 七类字段 Schema，并修正 checkbox 与 date 的提前设计。
 - 完成统一动态 `FormFieldRenderer` 及七个字段子组件；各子组件使用 computed 将宽联合 `FormValue` 适配为控件需要的 string、number、boolean 或 option string。
 - 将测试收缩为 5 个高价值用例，不再为基础字段保留重复测试。
+- 新增包含七类字段的静态求职申请 Schema，并实现 `getDefaultValue`、`createFormValues` 两个默认值纯函数。
+- 将编辑器页面拆分为 `EditorView` 与 `PreviewPanel`，已把静态 Schema、表单初始值和七类字段渲染器接入实时预览；本批集成代码保留为未提交断点。
 
 ### 验证结果
 
@@ -97,9 +105,11 @@
 - 学习者已自行审查页面；Codex 的后续浏览器视觉复验按学习者要求跳过。
 - Schema 修改文件：`src/types/form-schema.ts`、`src/types/form-schema.test.ts`。
 - `pnpm test`：5 个测试全部通过。
-- `vue-tsc -b` 与 Vite 生产构建成功；七类动态渲染组件通过类型检查。
+- `pnpm build`：成功，Vite 转换 1615 个模块；七类动态渲染组件及当前预览集成通过类型检查，仍只有已有的大包体非阻断警告。
 - `git diff --check`：通过。
-- Git 提交：`c9b56ca docs: define frontend app shell design`、`7479c56 feat: build frontend app shell`、`9836bfa feat: define initial form schema`、`5e95a57 feat: support seven form field schemas`；字段渲染器将在验证后提交。
+- 浏览器检查确认七类控件均已渲染；交互式 `v-model` 尚未完成浏览器验证。
+- Git 提交：`c9b56ca docs: define frontend app shell design`、`7479c56 feat: build frontend app shell`、`9836bfa feat: define initial form schema`、`5e95a57 feat: support seven form field schemas`、`1bf9dac feat: add dynamic form field renderer`；最新提交已推送至 `origin/codex/formpilot-v1`。
+- 未提交断点：路由改为新的编辑器目录，旧 `src/views/EditorView.vue` 已删除，并新增静态 Schema、默认值工具、`EditorView/EditorView.vue` 与 `EditorView/PreviewPanel.vue`。
 
 ### 学习与问题
 
@@ -109,16 +119,22 @@
 - 已确认理解：`z.literal(1)` 同时约束运行时值和推导类型；空数组与可选属性含义不同；`superRefine` 可以读取整个表单并添加多条、可定位路径的错误。
 - 仍需巩固：字段配置 Schema 与填写值类型的职责边界；不要为尚未进入范围的能力提前增加字段。
 - 关键问题与结论：动态组件父层负责分发，子组件内部通过 computed 完成精确值类型适配；类型检查和构建通过不能代替业务契约测试。
+- 当前预览集成尚未通过 UI 审查：字段缺少可见标签和 required 标识，预览标题、顶部标题及左栏字段数量仍为硬编码，非空字段下仍显示空状态。
+- `PreviewPanel` 当前通过 `v-model` 修改 `formValues` prop 的嵌套属性，虽然能够编译，但组件数据流需要在下一步确定为事件上抛或由父层集中管理。
 
 ### 明日第一步
 
-- 实现表单默认值纯函数，再将七类字段渲染器接入 `EditorView` 的静态预览。
+- 先用 `el-form` / `el-form-item` 为预览补齐字段标签和 required 状态，再把标题、字段数量和空状态改为 Schema 驱动；随后复核值更新数据流并进行浏览器交互验证，通过后再提交当前断点。
 
 ---
 
 ## 后续每日记录模板
 
 ## Day N — YYYY-MM-DD
+
+### 总体进度
+
+**N%**
 
 ### 今日目标
 

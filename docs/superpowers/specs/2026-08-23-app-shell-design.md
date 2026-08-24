@@ -9,7 +9,7 @@
 - `src/main.ts` 注册 Vue Router、Pinia、Element Plus 和全局样式。
 - `src/App.vue` 只承担应用壳职责，渲染 `RouterView`。
 - `/` 对应首页，展示项目名称、简短定位和进入编辑器的入口。
-- `/editor` 对应编辑器页，展示顶部工具栏与三栏静态骨架。
+- `/editor` 对应 `src/views/EditorView/EditorView.vue`，展示顶部工具栏与三栏静态骨架。
 
 不提前创建 Store、Schema、字段组件、弹窗、服务端接口或未来业务空文件。
 
@@ -42,8 +42,8 @@
 - 修改：`src/App.vue`
 - 创建：`src/router/index.ts`
 - 创建：`src/views/HomeView.vue`
-- 创建：`src/views/EditorView.vue`
-- 创建：`src/styles/main.css`
+- 创建：`src/views/EditorView/EditorView.vue`
+- 创建：`src/styles/main.scss`
 - 修改：`package.json`
 - 修改：`pnpm-lock.yaml`
 
@@ -54,3 +54,7 @@
 - 视口窄于 960px 时布局改为单列且不产生横向溢出。
 - 不包含未授权的核心业务实现和空壳业务文件。
 - `pnpm build` 成功。
+
+## 后续演进
+
+骨架完成后，实时预览已拆分为 `src/views/EditorView/PreviewPanel.vue`。该拆分属于动态表单阶段，不改变本设计文档限定的骨架职责。

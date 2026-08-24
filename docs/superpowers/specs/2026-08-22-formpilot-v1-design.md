@@ -16,7 +16,7 @@
 - `/` 为作品入口，`/editor` 为三栏编辑器：字段列表、实时预览、属性面板。
 - Zod Schema 是运行时和 TypeScript 类型的共同事实源；外部数据一律经 Zod 校验。
 - Pinia 管理当前 Schema、选中字段、草稿状态与 AI 请求状态；浏览器仓储只保存最新有效草稿。
-- `FormRenderer` 负责表单值、验证和提交，`FormFieldRenderer` 在控件边界把宽联合值适配为 string、number、boolean、option 四类明确值。
+- `EditorView` 管理当前静态 Schema 与表单值，`PreviewPanel` 组织预览表单；`FormFieldRenderer` 动态分发七类字段组件，各子组件在控件边界把宽联合值适配为 string、number、boolean、option string 四类明确值。后续提交校验出现时再决定是否抽取整表渲染组件。
 - CloudBase 静态托管承载 Vue/Vite SPA，Node.js 20 HTTP 云函数 `generateForm` 根据 `AI_MODE` 选择 Mock 或百炼 Provider。
 - 使用两套 CloudBase 环境：公开环境使用 Mock，受控演示环境使用真实 Key。前端通过公开的 `VITE_API_BASE_URL` 调用 HTTP 云函数，密钥只存在云函数环境变量。
 
@@ -24,7 +24,7 @@
 
 - `FormSchema` 包含 `schemaVersion: 1`、`id`、`title` 和 `fields`。
 - `FormValue = string | number | boolean | undefined`。
-- number/select/radio 默认 `undefined`，文本/textarea/date 默认空字符串，checkbox 默认 `false`。
+- number 默认 `undefined`，文本/textarea/select/radio/date 默认空字符串，checkbox 默认 `false`。
 - Schema 校验字段 ID 唯一、选项非空、长度/数值上下界顺序合法。
 - AI 请求为 `{ prompt: string }`；成功响应为 `{ source: 'mock' | 'bailian', schema }`；失败响应为 `{ error: { code, message } }`。
 
@@ -41,3 +41,10 @@
 - 每个增量通过相关 Vitest 测试与 `pnpm build`；测试聚焦高价值行为，不设覆盖率指标。
 - E2E 覆盖编辑排序、填写校验、AI 生成应用和导入导出。
 - 真实 AI 在受控 CloudBase 环境人工验证三条不同需求，不进入 CI。
+
+## 当前实现状态（2026-08-24）
+
+- 已完成应用骨架、七类 Zod 字段 Schema、整表字段 ID 唯一性校验和 5 个高价值测试。
+- 已完成统一动态字段渲染器及七个精确类型子组件，相关提交已推送到 `codex/formpilot-v1`。
+- 静态求职 Schema、默认值工具和 `PreviewPanel` 集成已写入工作区，但字段标签、required 展示、Schema 驱动标题/数量/空状态及浏览器输入验证仍待完成。
+- Pinia 编辑器状态、草稿、导入导出、AI 和部署尚未开始。

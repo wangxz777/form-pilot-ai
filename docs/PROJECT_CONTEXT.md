@@ -110,26 +110,30 @@
 
 ## 当前实际进度
 
-截至 2026-08-23：
+截至 2026-08-24：
 
-- 学习者决定清空前两天的核心业务实现并重新开始；旧 Schema、示例数据、表单工具和测试文件已从工作区删除，但删除尚未提交。
-- 已建立 Vue Router、Pinia、Element Plus 应用入口；`App.vue` 只渲染当前路由。
-- `/` 首页提供项目说明和编辑器入口。
-- `/editor` 已完成参考 `docs/ui` 的顶部工具栏、字段区、实时预览区和属性区静态骨架，并支持 960px 以下单列布局。
-- 当前没有 Store、Schema、字段渲染器、表单校验、草稿、导入导出或 AI 业务代码。
-- 最近一次执行 `pnpm build` 成功；Element Plus 整体引入产生单个 JS chunk 超过 500 kB 的非阻断警告。
-- 前端骨架提交为 `7479c56 feat: build frontend app shell`。
+- 已建立 Vue Router、Pinia、Element Plus 应用入口以及 `/`、`/editor` 页面骨架；编辑器具备顶部工具栏、字段区、实时预览区、属性区和窄屏单列布局。
+- `src/types/form-schema.ts` 已使用 Zod 定义七类字段、`schemaVersion: 1`、选项约束、min/max 关系及字段 ID 唯一性，并通过 `z.infer` 导出 TypeScript 类型。
+- 已完成统一 `FormFieldRenderer` 与七个字段组件；子组件通过 computed 适配 string、number、boolean 和 option string 四类控件值。
+- Schema 仅保留 5 个高价值测试；最新 `pnpm test` 为 5/5 通过，最新 `pnpm build` 成功，`git diff --check` 通过。Element Plus 整体引入仍有单个 JS chunk 超过 500 kB 的非阻断警告。
+- 分支为 `codex/formpilot-v1`；远端最新提交是 `1bf9dac feat: add dynamic form field renderer`，此前 Schema 提交为 `9836bfa`、`5e95a57`。
+- 当前工作区保留未提交的下一阶段断点：新增静态求职申请 Schema、默认值工具和拆分后的 `EditorView` / `PreviewPanel`，路由已指向新目录，旧的单文件 `EditorView.vue` 已删除。
+- 当前静态预览能够渲染七类控件，但尚未通过 UI 审查：字段没有可见标签与 required 标识，页面标题和字段数量仍为硬编码，字段非空时左栏仍显示空状态；交互式 `v-model` 尚未完成浏览器验证。
+- 尚未实现字段编辑与排序、表单提交校验、草稿、导入导出、AI 接口或部署。
 
 ## 当前开发边界
 
 - 后续由学习者主导核心类型、组件数据流和状态逻辑；Codex 默认只提供指引、审查、诊断和验证。
 - Zod 继续作为运行时 Schema 工具。运行时 Schema 使用小驼峰命名，例如 `formSchema`；TypeScript 类型使用大驼峰命名，例如 `FormSchema`。
 - 不恢复前两天的业务实现；新核心模块从空白状态逐步编写。
-- `@vue/test-utils` 与 `jsdom` 已安装但尚未使用，等首个真实组件行为测试时再接入。
+- 测试遵循精简原则：基础行为不重复补用例，只为关键业务契约和高风险流程增加少量测试。
+- 空的 `<style scoped lang="scss"></style>` 是允许的，不作为审查问题重复提示。
 - 当前不处理 Element Plus 包体拆分；在性能测试或部署阶段根据实际数据决定。
 
 ## 恢复开发时的起点
 
-1. 先决定并提交四个旧业务文件的删除，建立干净的新起点。
-2. 由学习者定义第一版受约束的 Zod `formSchema`，先覆盖最小字段集合和 `schemaVersion: 1`。
-3. Codex 审查命名、可辨识联合、`z.infer` 类型和运行时校验边界，再运行对应测试与生产构建。
+1. 保留当前未提交断点，不要重建静态 Schema、默认值工具或编辑器目录拆分。
+2. 在 `PreviewPanel` 中使用 `el-form` / `el-form-item` 显示 `field.label` 与 `field.required`，并继续保留现有 `v-for` 的 `field.id` key。
+3. 将预览标题、编辑器顶部标题、左栏字段数量和空状态改为 `formSchema` 数据驱动。
+4. 审查 `PreviewPanel` 直接修改 `formValues` prop 嵌套属性的数据流，决定是否改为事件上抛；完成浏览器输入验证。
+5. 重新运行 `pnpm test`、`pnpm build`、`git diff --check`，UI 审查通过后再提交并推送当前断点。
