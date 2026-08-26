@@ -3,12 +3,12 @@
     <h2 id="preview-title">实时预览</h2>
     <section class="form-canvas" aria-labelledby="form-title">
       <h3 id="form-title">{{ formSchema.title }}</h3>
-      <ElForm>
+      <ElForm :model="formValues" :rules="formRules">
         <ElFormItem
           v-for="field in formSchema.fields"
           :key="field.id"
           :label="field.label"
-          :required="field.required"
+          :prop="field.id"
         >
           <FormFieldRenderer
             :field="field"
@@ -22,16 +22,19 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import FormFieldRenderer from '@/components/formRenderer/FormFieldRenderer.vue'
 import { ElForm, ElFormItem } from 'element-plus'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
+import { createFormRules } from '@/utils/form-rules'
 
 const formEditorStore = useFormEditorStore()
 const { formSchema, formValues } = storeToRefs(formEditorStore)
 const { updateFormValue } = formEditorStore
+const formRules = computed(() => createFormRules(formSchema.value.fields))
 </script>
 
 <style scoped lang="scss"></style>
