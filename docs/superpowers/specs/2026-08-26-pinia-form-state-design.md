@@ -84,3 +84,10 @@ Store 暂不包含 `selectedFieldId`、自动保存状态或未来字段编辑 a
 - 不实现字段添加、删除、排序或属性编辑。
 - 不实现草稿保存、恢复或重置。
 - 不新增依赖；Pinia 已在应用入口注册。
+
+## 实施结果（2026-08-27）
+
+- 本设计的核心边界已经落实：`formSchema` 与 `formValues` 位于同一个 `useFormEditorStore`，字段值通过 `updateFormValue` action 更新。
+- `EditorView`、`EditorPanel` 与 `PreviewPanel` 已迁移到 Store；需要解构 state 的组件使用 `storeToRefs`，七个字段控件继续保持 Pinia 无关。
+- 对应功能提交为 `81724b4 feat: manage form state with Pinia`，最新自动验证为 `pnpm test` 10/10 通过、`pnpm build` 成功。
+- 设计完成后的后续阶段已增加 `selectedFieldId`／`selectedField`、Schema 驱动的 `formRules` 和属性只读展示；这些能力不属于本设计原始范围，相关现状与下一步以 `docs/PROJECT_CONTEXT.md` 和 `docs/DAILY_LOG.md` 为准。

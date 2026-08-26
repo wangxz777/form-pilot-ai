@@ -28,7 +28,7 @@
 - 修改：`src/views/EditorView/EditorPanel.vue`
 - 修改：`src/views/EditorView/PreviewPanel.vue`
 
-- [ ] **步骤 1：验证迁移前基线**
+- [x] **步骤 1：验证迁移前基线**
 
 运行：
 
@@ -39,7 +39,7 @@ pnpm build
 
 预期：5 个现有测试全部通过；生产构建成功，只允许保留已经记录的 500 kB chunk 非阻断警告。如果基线失败，先停止并审查当前未提交改动，不带着失败开始迁移。
 
-- [ ] **步骤 2：创建最小 Pinia Store**
+- [x] **步骤 2：创建最小 Pinia Store**
 
 在 `src/stores/form-editor.ts` 使用 Setup Store，保持以下公开接口：
 
@@ -60,7 +60,7 @@ export const useFormEditorStore = defineStore('formEditor', () => {
 
 需要从现有模块导入 `defineStore`、`reactive`、`jobApplicationSchema`、`createFormValues`、`FormSchema` 和 `FormValue`。不要增加 `selectedFieldId`、字段编辑、草稿或校验逻辑。
 
-- [ ] **步骤 3：让 `EditorView` 使用 Store**
+- [x] **步骤 3：让 `EditorView` 使用 Store**
 
 删除 `reactive`、`provide`、静态 Schema、默认值工具和 `FormSchema` 的本地导入及初始化，改为：
 
@@ -78,7 +78,7 @@ const formEditorStore = useFormEditorStore()
 
 不再向两个子面板传递 `formSchema` 或 `formValues` props，也不保留 `provide('formSchema', ...)`。
 
-- [ ] **步骤 4：让 `EditorPanel` 使用 Store**
+- [x] **步骤 4：让 `EditorPanel` 使用 Store**
 
 删除 `defineProps` 与 `FormSchema` 类型导入，创建同一个 Store 实例：
 
@@ -88,7 +88,7 @@ const formEditorStore = useFormEditorStore()
 
 将模板中所有 `formSchema.fields` 替换为 `formEditorStore.formSchema.fields`。保留学习者已经完成的字段数量、空状态、`field.id` key 和静态字段列表结构，不扩展添加、选择或删除行为。
 
-- [ ] **步骤 5：让 `PreviewPanel` 通过 Store action 更新字段值**
+- [x] **步骤 5：让 `PreviewPanel` 通过 Store action 更新字段值**
 
 删除 `defineProps`、`FormSchema` 与 `FormValue` 的 props 类型导入，创建 Store 实例。标题和循环均从 `formEditorStore.formSchema` 读取。
 
@@ -112,7 +112,7 @@ const formEditorStore = useFormEditorStore()
 
 `aria-labelledby` 的值必须是标题元素的 ID `form-title`，不能绑定为标题文字。
 
-- [ ] **步骤 6：运行自动验证**
+- [x] **步骤 6：运行自动验证**
 
 依次运行：
 
@@ -126,6 +126,8 @@ git diff --check
 
 - [ ] **步骤 7：完成浏览器交互验证**
 
+状态：按学习者协作规则暂缓，仅在学习者明确要求时执行，不影响本计划的代码完成状态。
+
 打开 `/editor` 并逐项确认：
 
 1. 顶部标题和预览标题均为“求职申请表”。
@@ -136,7 +138,7 @@ git diff --check
 6. 所有修改后的控件保持所选值，控制台无运行时错误。
 7. 标签、必填标识和现有字段列表继续显示。
 
-- [ ] **步骤 8：审查并提交本功能文件**
+- [x] **步骤 8：审查并提交本功能文件**
 
 审查实际差异，确认没有 `any`、类型断言、Provide/Inject 残留或范围外功能。只暂存本功能文件：
 
@@ -149,3 +151,10 @@ git commit -m "feat: manage form state with Pinia"
 ```
 
 不要把当前未提交的 `AGENTS.md` 流程规则混入该功能提交。提交后再次运行 `git status --short`，确认剩余改动符合预期。
+
+## 实施结果（2026-08-27）
+
+- Pinia 表单状态迁移已完成，功能提交为 `81724b4 feat: manage form state with Pinia`。
+- 实施中使用 `storeToRefs` 解构响应式 state，action 继续从 Store 实例获取，避免普通解构丢失响应性。
+- 后续阶段已在同一 Store 增加字段选择状态，并完成 Schema 驱动校验；这些属于本计划完成后的扩展，不修改本计划原始目标。
+- 最新自动验证为 `pnpm test` 10/10 通过、`pnpm build` 成功。

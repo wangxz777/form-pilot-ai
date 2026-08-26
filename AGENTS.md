@@ -58,14 +58,16 @@ At the end of each study day:
 
 1. Inspect the actual changed files.
 2. Run the relevant type check, tests, and production build.
-3. Update `docs/DAILY_LOG.md` with evidence-backed progress only.
-4. Record remaining misunderstandings without inventing learner feedback.
-5. Only after the learner explicitly says `结束今天开发`, run `codegraph sync` followed by `codegraph status` and record whether the repository index updated successfully. Do not infer the end of the study day from a commit, summary request, inactivity, or task completion.
-6. Give a concise daily summary and the next day's adjusted starting task.
+3. Update `docs/DAILY_LOG.md` with evidence-backed progress and the current overall project progress.
+4. Review and synchronize the relevant active documents under `docs/superpowers/plans` and `docs/superpowers/specs`, recording completed checkpoints, plan deviations, or changed decisions when applicable.
+5. Record remaining misunderstandings without inventing learner feedback.
+6. Do not record `git diff` or `git diff --check` results in daily logs, handoff documents, or daily summaries.
+7. Do not update CodeGraph as part of the daily workflow. Run `codegraph sync` and `codegraph status` only when the learner explicitly requests a CodeGraph update.
+8. Give a concise daily summary and the next day's adjusted starting task.
 
 ## Current commands
 
 - Install: `pnpm install`
 - Development: `pnpm dev`
 - Type check and production build: `pnpm build`
-- Update CodeGraph only after the learner says `结束今天开发`: `codegraph sync && codegraph status`
+- Update CodeGraph only when the learner explicitly requests it: `codegraph sync && codegraph status`
