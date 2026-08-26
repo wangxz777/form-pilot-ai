@@ -35,3 +35,45 @@ import { useFormEditorStore } from '@/stores/form-editor.ts'
 const formEditorStore = useFormEditorStore()
 const { formSchema } = storeToRefs(formEditorStore)
 </script>
+
+<style scoped lang="scss">
+.editor-layout {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 288px minmax(560px, 1fr) 272px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-layout > :deep(.editor-panel),
+.editor-layout > :deep(.preview-panel) {
+  min-width: 0;
+  min-height: 0;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+
+.editor-layout > :deep(.editor-panel) {
+  background: #ffffff;
+}
+
+@media (max-width: 1200px) {
+  .editor-layout {
+    grid-template-columns: 260px minmax(440px, 1fr) 248px;
+  }
+}
+
+@media (max-width: 960px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .editor-layout > :deep(.editor-panel),
+  .editor-layout > :deep(.preview-panel) {
+    padding: 24px 20px;
+    overflow: visible;
+  }
+}
+</style>
