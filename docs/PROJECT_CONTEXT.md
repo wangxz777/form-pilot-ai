@@ -110,16 +110,17 @@
 
 ## 当前实际进度
 
-截至 2026-08-24：
+截至 2026-08-27，整体进度约 **30%**：
 
-- 已建立 Vue Router、Pinia、Element Plus 应用入口以及 `/`、`/editor` 页面骨架；编辑器具备顶部工具栏、字段区、实时预览区、属性区和窄屏单列布局。
-- `src/types/form-schema.ts` 已使用 Zod 定义七类字段、`schemaVersion: 1`、选项约束、min/max 关系及字段 ID 唯一性，并通过 `z.infer` 导出 TypeScript 类型。
-- 已完成统一 `FormFieldRenderer` 与七个字段组件；子组件通过 computed 适配 string、number、boolean 和 option string 四类控件值。
-- Schema 仅保留 5 个高价值测试；最新 `pnpm test` 为 5/5 通过，最新 `pnpm build` 成功，`git diff --check` 通过。Element Plus 整体引入仍有单个 JS chunk 超过 500 kB 的非阻断警告。
-- 分支为 `codex/formpilot-v1`；远端最新提交是 `1bf9dac feat: add dynamic form field renderer`，此前 Schema 提交为 `9836bfa`、`5e95a57`。
-- 当前工作区保留未提交的下一阶段断点：新增静态求职申请 Schema、默认值工具和拆分后的 `EditorView` / `PreviewPanel`，路由已指向新目录，旧的单文件 `EditorView.vue` 已删除。
-- 当前静态预览能够渲染七类控件，但尚未通过 UI 审查：字段没有可见标签与 required 标识，页面标题和字段数量仍为硬编码，字段非空时左栏仍显示空状态；交互式 `v-model` 尚未完成浏览器验证。
-- 尚未实现字段编辑与排序、表单提交校验、草稿、导入导出、AI 接口或部署。
+- 第一周基础已完成：Vue Router、Pinia、Element Plus、Zod、Vitest 和编辑器页面骨架均已接入。
+- `src/types/form-schema.ts` 已定义 text、number、textarea、select、radio、checkbox、date 七类字段、`schemaVersion: 1`、选项约束、长度／范围关系及字段 ID 唯一性，并通过 `z.infer` 导出类型。
+- 已完成统一 `FormFieldRenderer` 与七个字段组件；字段值通过类型化 `v-model` 写入 Pinia 的 `formValues`。
+- `formSchema`、`formValues`、`selectedFieldId` 和派生的 `selectedField` 已集中到 `useFormEditorStore`，组件使用 `storeToRefs` 保持响应性，写入通过 action 完成。
+- 已完成 Schema 驱动的 Element Plus 规则适配：支持 required、minLength、maxLength、min、max，并用 10 个高价值测试覆盖必填、多字段、单侧文本长度和负数数字边界。
+- 编辑器三栏已按 `docs/ui` 参考图调整：左侧字段可选中，中央实时预览扩大，右侧通过 `settings` 循环展示基础属性并使用只读 `ElSwitch` 表示 required；面板样式已归入各自 Vue 模块。
+- 当前分支为 `codex/formpilot-v1`；最新功能提交为 `ab43247 style: refine editor workspace layout`，此前关键提交包括 `23e2ca0`、`46ff66e`、`2f3155c` 和 `81724b4`。
+- 最新验证为 `pnpm test` 10/10、`pnpm build` 成功、`git diff --check` 通过；Element Plus 整体引入仍有单个 JS chunk 超过 500 kB 的非阻断警告。
+- 尚未实现属性修改、字段新增／删除／排序、草稿、JSON 导入导出、AI 接口、部署和最终作品集文档。
 
 ## 当前开发边界
 
@@ -132,8 +133,8 @@
 
 ## 恢复开发时的起点
 
-1. 保留当前未提交断点，不要重建静态 Schema、默认值工具或编辑器目录拆分。
-2. 在 `PreviewPanel` 中使用 `el-form` / `el-form-item` 显示 `field.label` 与 `field.required`，并继续保留现有 `v-for` 的 `field.id` key。
-3. 将预览标题、编辑器顶部标题、左栏字段数量和空状态改为 `formSchema` 数据驱动。
-4. 审查 `PreviewPanel` 直接修改 `formValues` prop 嵌套属性的数据流，决定是否改为事件上抛；完成浏览器输入验证。
-5. 重新运行 `pnpm test`、`pnpm build`、`git diff --check`，UI 审查通过后再提交并推送当前断点。
+1. 从 `useFormEditorStore` 增加字段基础属性更新 action 开始，先支持 `label` 与 `required`，不要让 `PropertyPanel` 直接修改 Store state。
+2. 将 `PropertyPanel` 中名称展示改为 `ElInput`，只读 `ElSwitch` 改为通过 action 更新；字段 ID 与字段类型继续只读。
+3. 验证属性修改能同步更新左侧字段名称、中央预览标签以及由 `computed` 生成的 `formRules`。
+4. 该闭环审查通过后，再进入字段新增、删除与排序；删除字段时必须同步处理 `formValues` 和 `selectedFieldId`。
+5. 关键行为测试由 Codex 在更新 action 稳定后补充，再运行 `pnpm test`、`pnpm build` 和 `git diff --check`。
