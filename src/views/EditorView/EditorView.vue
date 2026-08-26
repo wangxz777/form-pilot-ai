@@ -4,7 +4,7 @@
       <div class="toolbar-identity">
         <span class="toolbar-brand">FormPilot AI</span>
         <span class="toolbar-divider" aria-hidden="true"></span>
-        <h1 class="toolbar-form-name">求职申请表</h1>
+        <h1 class="toolbar-form-name">{{ formSchema.title }}</h1>
         <span class="toolbar-save-status">已自动保存</span>
       </div>
 
@@ -17,18 +17,8 @@
     </header>
 
     <div class="editor-layout">
-      <aside class="editor-panel field-panel" aria-labelledby="field-list-title">
-        <div class="panel-heading">
-          <div class="panel-title-group">
-            <h2 id="field-list-title">字段</h2>
-            <span class="field-count">0</span>
-          </div>
-          <el-button type="primary" plain>添加字段</el-button>
-        </div>
-        <p class="panel-empty-state">暂未添加字段</p>
-      </aside>
-
-      <PreviewPanel :formSchema="formSchema" :formValues="formValues" />
+      <EditorPanel />
+      <PreviewPanel />
 
       <aside class="editor-panel property-panel" aria-labelledby="property-title">
         <h2 id="property-title">字段属性</h2>
@@ -39,13 +29,13 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { storeToRefs } from 'pinia'
+
 import PreviewPanel from './PreviewPanel.vue'
+import EditorPanel from './EditorPanel.vue'
 
-import { jobApplicationSchema } from '@/data/job-application-schema.ts'
-import { createFormValues } from '@/utils/form-values'
-import type { FormSchema } from '@/types/form-schema.ts'
+import { useFormEditorStore } from '@/stores/form-editor.ts'
 
-const formSchema = reactive<FormSchema>(jobApplicationSchema)
-const formValues = reactive(createFormValues(formSchema.fields))
+const formEditorStore = useFormEditorStore()
+const { formSchema } = storeToRefs(formEditorStore)
 </script>
