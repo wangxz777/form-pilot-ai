@@ -14,6 +14,7 @@
             :field="field"
             :model-value="formValues[field.id]"
             @update:model-value="(v) => updateFormValue(field.id, v)"
+            @click="selectField(field.id)"
           />
         </ElFormItem>
       </ElForm>
@@ -33,7 +34,7 @@ import { createFormRules } from '@/utils/form-rules'
 
 const formEditorStore = useFormEditorStore()
 const { formSchema, formValues } = storeToRefs(formEditorStore)
-const { updateFormValue } = formEditorStore
+const { updateFormValue, selectField } = formEditorStore
 const formRules = computed(() => createFormRules(formSchema.value.fields))
 </script>
 

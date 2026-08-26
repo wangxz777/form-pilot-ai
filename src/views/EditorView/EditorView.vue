@@ -19,11 +19,7 @@
     <div class="editor-layout">
       <EditorPanel />
       <PreviewPanel />
-
-      <aside class="editor-panel property-panel" aria-labelledby="property-title">
-        <h2 id="property-title">字段属性</h2>
-        <p class="panel-empty-state">请选择一个字段进行编辑</p>
-      </aside>
+      <PropertyPanel />
     </div>
   </div>
 </template>
@@ -33,7 +29,7 @@ import { storeToRefs } from 'pinia'
 
 import PreviewPanel from './PreviewPanel.vue'
 import EditorPanel from './EditorPanel.vue'
-
+import PropertyPanel from './PropertyPanel.vue'
 import { useFormEditorStore } from '@/stores/form-editor.ts'
 
 const formEditorStore = useFormEditorStore()
