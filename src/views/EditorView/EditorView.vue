@@ -9,10 +9,10 @@
       </div>
 
       <nav class="toolbar-actions" aria-label="表单操作">
-        <el-button>预览</el-button>
-        <el-button>导入</el-button>
-        <el-button>导出</el-button>
-        <el-button type="primary">AI 生成</el-button>
+        <ElButton>预览</ElButton>
+        <ElButton>导入</ElButton>
+        <ElButton>导出</ElButton>
+        <ElButton type="primary">AI 生成</ElButton>
       </nav>
     </header>
 
@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
+import { ElButton } from 'element-plus'
 
 import PreviewPanel from './PreviewPanel.vue'
 import EditorPanel from './EditorPanel.vue'

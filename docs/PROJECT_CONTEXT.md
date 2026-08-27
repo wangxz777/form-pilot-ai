@@ -110,17 +110,19 @@
 
 ## 当前实际进度
 
-截至 2026-08-27，整体进度约 **30%**：
+截至 2026-08-27，整体进度约 **40%**：
 
 - 第一周基础已完成：Vue Router、Pinia、Element Plus、Zod、Vitest 和编辑器页面骨架均已接入。
 - `src/types/form-schema.ts` 已定义 text、number、textarea、select、radio、checkbox、date 七类字段、`schemaVersion: 1`、选项约束、长度／范围关系及字段 ID 唯一性，并通过 `z.infer` 导出类型。
 - 已完成统一 `FormFieldRenderer` 与七个字段组件；字段值通过类型化 `v-model` 写入 Pinia 的 `formValues`。
 - `formSchema`、`formValues`、`selectedFieldId` 和派生的 `selectedField` 已集中到 `useFormEditorStore`，组件使用 `storeToRefs` 保持响应性，写入通过 action 完成。
-- 已完成 Schema 驱动的 Element Plus 规则适配：支持 required、minLength、maxLength、min、max，并用 10 个高价值测试覆盖必填、多字段、单侧文本长度和负数数字边界。
-- 编辑器三栏已按 `docs/ui` 参考图调整：左侧字段可选中，中央实时预览扩大，右侧通过 `settings` 循环展示基础属性并使用只读 `ElSwitch` 表示 required；面板样式已归入各自 Vue 模块。
-- 当前分支为 `codex/formpilot-v1`；最新功能提交为 `ab43247 style: refine editor workspace layout`，此前关键提交包括 `23e2ca0`、`46ff66e`、`2f3155c` 和 `81724b4`。
-- 最新验证为 `pnpm test` 10/10、`pnpm build` 成功、`git diff --check` 通过；Element Plus 整体引入仍有单个 JS chunk 超过 500 kB 的非阻断警告。
-- 尚未实现属性修改、字段新增／删除／排序、草稿、JSON 导入导出、AI 接口、部署和最终作品集文档。
+- 已完成 Schema 驱动的 Element Plus 规则适配：支持 required、minLength、maxLength、min、max；复选框必填只接受已勾选状态。
+- 编辑器三栏已按 `docs/ui` 参考图调整；字段支持选择、七类型弹窗新增、直接删除和拖拽排序，相关值与选中状态由 Store 同步维护。
+- 属性面板支持名称、必填、文本长度和数字范围编辑；公共属性与类型专属属性使用显式模板，通过 `field.type` 保持 TypeScript 类型收窄。
+- Element Plus 已移除全量组件注册，首页和编辑器使用路由懒加载；最大 JavaScript 产物约 396 kB，超过 500 kB 的构建警告已消失。
+- 当前分支为 `codex/formpilot-v1`；本阶段代码和文档将在今日收尾提交。
+- 最新验证为 `pnpm test` 16/16、`pnpm build` 成功。
+- 尚未实现约束关系的属性面板提示、select／radio 选项编辑、表单标题编辑、草稿、JSON 导入导出、AI 接口、部署和最终作品集文档。
 
 ## 当前开发边界
 
@@ -132,12 +134,12 @@
 - 不恢复前两天的业务实现；新核心模块从空白状态逐步编写。
 - 测试遵循精简原则：基础行为不重复补用例，只为关键业务契约和高风险流程增加少量测试。
 - 空的 `<style scoped lang="scss"></style>` 是允许的，不作为审查问题重复提示。
-- 当前不处理 Element Plus 包体拆分；在性能测试或部署阶段根据实际数据决定。
+- Element Plus 组件采用局部导入；保留当前全局样式入口，后续仅在有明确样式体积目标时继续拆分 CSS。
 
 ## 恢复开发时的起点
 
-1. 从 `useFormEditorStore` 增加字段基础属性更新 action 开始，先支持 `label` 与 `required`，不要让 `PropertyPanel` 直接修改 Store state。
-2. 将 `PropertyPanel` 中名称展示改为 `ElInput`，只读 `ElSwitch` 改为通过 action 更新；字段 ID 与字段类型继续只读。
-3. 验证属性修改能同步更新左侧字段名称、中央预览标签以及由 `computed` 生成的 `formRules`。
-4. 该闭环审查通过后，再进入字段新增、删除与排序；删除字段时必须同步处理 `formValues` 和 `selectedFieldId`。
-5. 关键行为测试由 Codex 在更新 action 稳定后补充，再运行 `pnpm test`、`pnpm build` 和 `git diff --check`。
+1. 为文本长度和数字范围编辑增加关系校验与可见错误提示，避免最小值大于最大值。
+2. 为 select／radio 字段实现选项新增、编辑和删除，同时保证至少保留一个合法选项。
+3. 完成表单标题编辑，使顶部标题与预览标题保持同步。
+4. 第 2 周字段编辑闭环稳定后，进入单份草稿和 JSON 导入导出。
+5. 在关键行为稳定后由 Codex 补充少量回归测试，并运行 `pnpm test` 与 `pnpm build`。

@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
 import { reactive, ref, computed } from 'vue'
 
-import type { FormSchema, FormValue } from '@/types/form-schema'
+import type { FormSchema, FormValue, NumberField, TextField, TextareaField } from '@/types/form-schema'
 import { createFormValues, getDefaultValue } from '@/utils/form-values'
 import { jobApplicationSchema } from '@/data/job-application-schema'
 
 import type { FormField } from '@/types/form-schema'
 
 type EditableFieldProperties = Partial<Pick<FormField, 'label' | 'required'>>
+type TextFieldConstraints = Partial<Pick<TextField | TextareaField, 'minLength' | 'maxLength'>>
+type NumberFieldConstraints = Partial<Pick<NumberField, 'min' | 'max'>>
 
 const fieldLabels: Record<FormField['type'], string> = {
   text: '单行文本',
@@ -98,6 +100,22 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     Object.assign(field, properties)
   }
 
+  function updateTextFieldConstraints(fieldId: string, constraints: TextFieldConstraints) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field || (field.type !== 'text' && field.type !== 'textarea')) return
+
+    Object.assign(field, constraints)
+  }
+
+  function updateNumberFieldConstraints(fieldId: string, constraints: NumberFieldConstraints) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field || field.type !== 'number') return
+
+    Object.assign(field, constraints)
+  }
+
   function addField(type: FormField['type']) {
     const newField = createField(type)
     formSchema.fields.push(newField)
@@ -138,6 +156,8 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     updateFormValue,
     selectField,
     updateFieldProperties,
+    updateTextFieldConstraints,
+    updateNumberFieldConstraints,
     addField,
     removeField,
     moveField,

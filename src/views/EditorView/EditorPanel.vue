@@ -5,7 +5,7 @@
         <h2 id="field-list-title">字段</h2>
         <span class="field-count">{{ formSchema.fields.length }}</span>
       </div>
-      <el-button type="primary" plain @click="addFieldDialogVisible = true">添加字段</el-button>
+      <ElButton type="primary" plain @click="addFieldDialogVisible = true">添加字段</ElButton>
     </div>
 
     <div class="panel-body">
@@ -37,6 +37,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { ElButton } from 'element-plus'
 
 import AddFieldDialog from './AddFieldDialog.vue'
 import { useDraggable } from 'vue-draggable-plus'

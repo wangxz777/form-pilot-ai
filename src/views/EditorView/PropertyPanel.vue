@@ -2,27 +2,74 @@
   <aside class="editor-panel property-panel" aria-labelledby="property-title">
     <h2 id="property-title">字段属性</h2>
     <div v-if="selectedField" class="property-content">
-      <div
-        v-for="setting in settings"
-        :key="setting.label"
-        class="property-item"
-        :class="{ 'property-required-row': setting.value === 'required' }"
-      >
-        <span class="property-label">{{ setting.label }}</span>
+      <div class="property-item">
+        <span class="property-label">字段名称</span>
+        <ElInput
+          :model-value="selectedField.label"
+          @update:model-value="updateFieldProperties(selectedField.id, { label: $event })"
+        />
+      </div>
+
+      <div class="property-item">
+        <span class="property-label">字段 ID</span>
+        <ElInput class="property-value-code" :model-value="selectedField.id" disabled />
+      </div>
+
+      <div class="property-item">
+        <span class="property-label">字段类型</span>
+        <ElInput :model-value="selectedField.type" disabled />
+      </div>
+
+      <div class="property-item property-required-row">
+        <span class="property-label">是否必填</span>
         <ElSwitch
-          v-if="setting.value === 'required'"
           :model-value="selectedField.required ?? false"
           @update:model-value="handleRequiredChange"
         />
-
-        <ElInput
-          v-else
-          :class="{ 'property-value-code': setting.value === 'id' }"
-          :model-value="selectedField[setting.value]"
-          @update:model-value="updateFieldProperties(selectedField.id, { [setting.value]: $event })"
-          :disabled="setting.readonly"
-        />
       </div>
+
+      <template v-if="selectedField.type === 'text' || selectedField.type === 'textarea'">
+        <div class="property-item">
+          <span class="property-label">最小长度</span>
+          <ElInputNumber
+            :model-value="selectedField.minLength"
+            :min="0"
+            @update:model-value="
+              updateTextFieldConstraints(selectedField.id, { minLength: $event })
+            "
+          />
+        </div>
+
+        <div class="property-item">
+          <span class="property-label">最大长度</span>
+          <ElInputNumber
+            :model-value="selectedField.maxLength"
+            :min="0"
+            @update:model-value="
+              updateTextFieldConstraints(selectedField.id, { maxLength: $event })
+            "
+          />
+        </div>
+      </template>
+
+      <template v-else-if="selectedField.type === 'number'">
+        <div class="property-item">
+          <span class="property-label">最小值</span>
+          <ElInputNumber
+            :model-value="selectedField.min"
+            @update:model-value="updateNumberFieldConstraints(selectedField.id, { min: $event })"
+          />
+        </div>
+
+        <div class="property-item">
+          <span class="property-label">最大值</span>
+          <ElInputNumber
+            :model-value="selectedField.max"
+            @update:model-value="updateNumberFieldConstraints(selectedField.id, { max: $event })"
+          />
+        </div>
+      </template>
+
       <ElButton type="danger" @click="removeField(selectedField.id)">
         <SvgIcon name="delete" />
         删除字段
@@ -33,32 +80,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { ElSwitch, ElInput, ElButton } from 'element-plus'
+import { ElSwitch, ElInput, ElInputNumber, ElButton } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon.vue'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
-import type { FormField } from '@/types/form-schema'
-type Setting = {
-  label: string
-  value: keyof FormField
-  readonly?: boolean
-}
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
-const { updateFieldProperties, removeField } = formEditorStore
-const baseSettings: Setting[] = [
-  { label: '字段名称', value: 'label' },
-  { label: '字段 ID', value: 'id', readonly: true },
-  { label: '字段类型', value: 'type', readonly: true },
-  { label: '是否必填', value: 'required' },
-]
-
-const settings = computed<Setting[]>(() => {
-  return baseSettings
-})
+const {
+  updateFieldProperties,
+  updateTextFieldConstraints,
+  updateNumberFieldConstraints,
+  removeField,
+} = formEditorStore
 
 function handleRequiredChange(value: string | number | boolean) {
   if (!selectedField.value || typeof value !== 'boolean') return

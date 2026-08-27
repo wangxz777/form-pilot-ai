@@ -26,6 +26,22 @@ describe('createFormRules', () => {
     expect(rules).toEqual({})
   })
 
+  it('必填复选框只接受已勾选状态', () => {
+    const rules = createFormRules([
+      { id: 'agreement', type: 'checkbox', label: '同意用户协议', required: true },
+    ])
+
+    expect(rules.agreement).toEqual([
+      {
+        required: true,
+        type: 'enum',
+        enum: [true],
+        message: '请勾选同意用户协议',
+        trigger: ['change'],
+      },
+    ])
+  })
+
   it('按字段 id 为多个必填字段创建规则', () => {
     const rules = createFormRules([
       { id: 'name', type: 'text', label: '姓名', required: true },

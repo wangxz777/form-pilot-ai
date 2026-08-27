@@ -8,6 +8,14 @@ const requiredRule = (label: string): FormItemRule => ({
   trigger: ['blur', 'change'],
 })
 
+const checkboxRequiredRule = (label: string): FormItemRule => ({
+  required: true,
+  type: 'enum',
+  enum: [true],
+  message: `请勾选${label}`,
+  trigger: ['change'],
+})
+
 const textLengthRule = (label: string, minLength?: number, maxLength?: number): FormItemRule[] => {
   const rules: FormItemRule[] = []
 
@@ -58,7 +66,9 @@ export function createFormRules(fields: FormField[]): FormRules {
   return fields.reduce<FormRules>((rules, field) => {
     const fieldRules: FormItemRule[] = []
 
-    if (field.required) {
+    if (field.required && field.type === 'checkbox') {
+      fieldRules.push(checkboxRequiredRule(field.label))
+    } else if (field.required) {
       fieldRules.push(requiredRule(field.label))
     }
 

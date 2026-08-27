@@ -58,6 +58,29 @@ describe('useFormEditorStore', () => {
     expect(JSON.stringify(store.formSchema.fields)).toBe(originalFields)
   })
 
+  it('只为匹配的字段类型更新专属约束', () => {
+    store.addField('text')
+    const textField = store.formSchema.fields.at(-1)
+    if (!textField || textField.type !== 'text') throw new Error('应创建文本字段')
+
+    store.addField('number')
+    const numberField = store.formSchema.fields.at(-1)
+    if (!numberField || numberField.type !== 'number') throw new Error('应创建数字字段')
+
+    try {
+      store.updateTextFieldConstraints(textField.id, { minLength: 2, maxLength: 20 })
+      store.updateNumberFieldConstraints(numberField.id, { min: -10, max: 100 })
+      store.updateNumberFieldConstraints(textField.id, { min: 0 })
+
+      expect(textField).toMatchObject({ minLength: 2, maxLength: 20 })
+      expect(numberField).toMatchObject({ min: -10, max: 100 })
+      expect(textField).not.toHaveProperty('min')
+    } finally {
+      store.removeField(textField.id)
+      store.removeField(numberField.id)
+    }
+  })
+
   it('创建七种合法字段并初始化默认值和选中状态', () => {
     const fieldTypes: FormField['type'][] = [
       'text',
