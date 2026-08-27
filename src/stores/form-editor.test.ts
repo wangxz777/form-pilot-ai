@@ -2,6 +2,8 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { useFormEditorStore } from './form-editor'
+import { formSchema } from '@/types/form-schema'
+import type { FormField } from '@/types/form-schema'
 
 describe('useFormEditorStore', () => {
   let store: ReturnType<typeof useFormEditorStore>
@@ -54,5 +56,56 @@ describe('useFormEditorStore', () => {
     })
 
     expect(JSON.stringify(store.formSchema.fields)).toBe(originalFields)
+  })
+
+  it('创建七种合法字段并初始化默认值和选中状态', () => {
+    const fieldTypes: FormField['type'][] = [
+      'text',
+      'number',
+      'textarea',
+      'select',
+      'radio',
+      'checkbox',
+      'date',
+    ]
+    const addedFieldIds: string[] = []
+
+    try {
+      fieldTypes.forEach((type) => {
+        store.addField(type)
+
+        const addedField = store.formSchema.fields.at(-1)
+        if (!addedField) throw new Error('新增字段后 Schema 不应为空')
+
+        addedFieldIds.push(addedField.id)
+        expect(addedField.type).toBe(type)
+        expect(store.formValues).toHaveProperty(addedField.id)
+        expect(store.selectedFieldId).toBe(addedField.id)
+      })
+
+      expect(formSchema.safeParse(store.formSchema).success).toBe(true)
+    } finally {
+      addedFieldIds.forEach((id) => store.removeField(id))
+    }
+  })
+
+  it('移动字段时保留字段值和选中状态', () => {
+    const originalFieldIds = store.formSchema.fields.map((field) => field.id)
+    const movedFieldId = originalFieldIds[0]
+    if (!movedFieldId) throw new Error('测试 Schema 至少需要一个字段')
+
+    store.selectField(movedFieldId)
+    store.updateFormValue(movedFieldId, '已填写内容')
+
+    try {
+      store.moveField(0, 2)
+
+      expect(store.formSchema.fields[2]?.id).toBe(movedFieldId)
+      expect(store.formValues[movedFieldId]).toBe('已填写内容')
+      expect(store.selectedFieldId).toBe(movedFieldId)
+    } finally {
+      store.moveField(2, 0)
+      store.updateFormValue(movedFieldId, '')
+    }
   })
 })

@@ -5,12 +5,12 @@
         <h2 id="field-list-title">字段</h2>
         <span class="field-count">{{ formSchema.fields.length }}</span>
       </div>
-      <el-button type="primary" plain>添加字段</el-button>
+      <el-button type="primary" plain @click="addFieldDialogVisible = true">添加字段</el-button>
     </div>
 
     <div class="panel-body">
       <p v-if="formSchema.fields.length === 0" class="panel-empty-state">暂未添加字段</p>
-      <div v-else class="field-list">
+      <div v-else ref="fieldListRef" class="field-list">
         <button
           v-for="field in formSchema.fields"
           :key="field.id"
@@ -29,12 +29,19 @@
         </button>
       </div>
     </div>
+
+    <AddFieldDialog v-model="addFieldDialogVisible" @confirm="handleAddField" />
   </aside>
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
+
+import AddFieldDialog from './AddFieldDialog.vue'
+import { useDraggable } from 'vue-draggable-plus'
 import { useFormEditorStore } from '@/stores/form-editor.ts'
+
 import type { FormField } from '@/types/form-schema'
 
 const fieldTypeMeta: Record<FormField['type'], string> = {
@@ -50,7 +57,24 @@ const fieldTypeMeta: Record<FormField['type'], string> = {
 const formEditorStore = useFormEditorStore()
 const { formSchema, selectedFieldId } = storeToRefs(formEditorStore)
 
-const { selectField } = formEditorStore
+const { addField, moveField, selectField } = formEditorStore
+const addFieldDialogVisible = ref(false)
+
+const fieldListRef = ref<HTMLElement | null>(null)
+
+useDraggable(fieldListRef, undefined, {
+  animation: 150,
+  handle: '.field-drag',
+  onUpdate(event) {
+    if (event.oldIndex === undefined || event.newIndex === undefined) return
+    moveField(event.oldIndex, event.newIndex)
+  },
+})
+
+function handleAddField(type: FormField['type']) {
+  addField(type)
+  addFieldDialogVisible.value = false
+}
 </script>
 
 <style scoped lang="scss">
@@ -133,7 +157,10 @@ h2 {
   background: #ffffff;
   border: 1px solid #dcdfe6;
   border-radius: 6px;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
 .field-type-icon {

@@ -23,6 +23,10 @@
           :disabled="setting.readonly"
         />
       </div>
+      <ElButton type="danger" @click="removeField(selectedField.id)">
+        <SvgIcon name="delete" />
+        删除字段
+      </ElButton>
     </div>
     <p v-else class="panel-empty-state">请选择一个字段进行编辑</p>
   </aside>
@@ -31,11 +35,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { ElSwitch, ElInput } from 'element-plus'
+import { ElSwitch, ElInput, ElButton } from 'element-plus'
+import SvgIcon from '@/components/SvgIcon.vue'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
 import type { FormField } from '@/types/form-schema'
-
 type Setting = {
   label: string
   value: keyof FormField
@@ -44,7 +48,7 @@ type Setting = {
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
-const { updateFieldProperties } = formEditorStore
+const { updateFieldProperties, removeField } = formEditorStore
 const baseSettings: Setting[] = [
   { label: '字段名称', value: 'label' },
   { label: '字段 ID', value: 'id', readonly: true },
