@@ -12,15 +12,16 @@
         <ElSwitch
           v-if="setting.value === 'required'"
           :model-value="selectedField.required ?? false"
-          disabled
+          @update:model-value="handleRequiredChange"
         />
-        <span
+
+        <ElInput
           v-else
-          class="property-value"
           :class="{ 'property-value-code': setting.value === 'id' }"
-        >
-          {{ selectedField[setting.value] ?? '-' }}
-        </span>
+          :model-value="selectedField[setting.value]"
+          @update:model-value="updateFieldProperties(selectedField.id, { [setting.value]: $event })"
+          :disabled="setting.readonly"
+        />
       </div>
     </div>
     <p v-else class="panel-empty-state">请选择一个字段进行编辑</p>
@@ -30,7 +31,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { ElSwitch } from 'element-plus'
+import { ElSwitch, ElInput } from 'element-plus'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
 import type { FormField } from '@/types/form-schema'
@@ -38,21 +39,27 @@ import type { FormField } from '@/types/form-schema'
 type Setting = {
   label: string
   value: keyof FormField
+  readonly?: boolean
 }
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
-
+const { updateFieldProperties } = formEditorStore
 const baseSettings: Setting[] = [
   { label: '字段名称', value: 'label' },
-  { label: '字段 ID', value: 'id' },
-  { label: '字段类型', value: 'type' },
+  { label: '字段 ID', value: 'id', readonly: true },
+  { label: '字段类型', value: 'type', readonly: true },
   { label: '是否必填', value: 'required' },
 ]
 
 const settings = computed<Setting[]>(() => {
   return baseSettings
 })
+
+function handleRequiredChange(value: string | number | boolean) {
+  if (!selectedField.value || typeof value !== 'boolean') return
+  updateFieldProperties(selectedField.value.id, { required: value })
+}
 </script>
 
 <style scoped lang="scss">
@@ -101,7 +108,7 @@ h2 {
 
 .property-value-code {
   color: #606266;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   font-size: 12px;
 }
 

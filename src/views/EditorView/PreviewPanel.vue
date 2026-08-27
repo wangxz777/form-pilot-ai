@@ -8,9 +8,11 @@
         <ElFormItem
           v-for="field in formSchema.fields"
           :key="field.id"
-          :label="field.label"
           :prop="field.id"
         >
+          <template #label>
+            {{ field.label }}
+          </template>
           <FormFieldRenderer
             :field="field"
             :model-value="formValues[field.id]"

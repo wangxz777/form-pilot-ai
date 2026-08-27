@@ -4,6 +4,11 @@ import { reactive, ref, computed } from 'vue'
 import type { FormSchema, FormValue } from '@/types/form-schema'
 import { createFormValues } from '@/utils/form-values'
 import { jobApplicationSchema } from '@/data/job-application-schema'
+
+import type { FormField } from '@/types/form-schema'
+
+type EditableFieldProperties = Partial<Pick<FormField, 'label' | 'required'>>
+
 export const useFormEditorStore = defineStore('formEditor', () => {
   const formSchema = reactive<FormSchema>(jobApplicationSchema)
 
@@ -23,6 +28,14 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     selectedFieldId.value = fieldId
   }
 
+  function updateFieldProperties(fieldId: string, properties: EditableFieldProperties) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field) return
+
+    Object.assign(field, properties)
+  }
+
   return {
     formSchema,
     formValues,
@@ -30,5 +43,6 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     selectedField,
     updateFormValue,
     selectField,
+    updateFieldProperties,
   }
 })
