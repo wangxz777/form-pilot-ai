@@ -1,6 +1,6 @@
 # 属性配置与预览画布实现计划
 
-> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [ ]`）语法来跟踪进度。
+> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [x]`）语法来跟踪进度。
 
 **目标：** 将 PropertyPanel 的配置生成逻辑抽到类型安全的组合式函数，并把 PreviewPanel 改为只支持字段展示、选中和拖拽的设计画布。
 
@@ -29,7 +29,7 @@
 - 保留：`src/types/form-schema.ts`
 - 保留：`src/types/form-schema.test.ts`
 
-- [ ] **步骤 1：编写属性配置失败测试**
+- [x] **步骤 1：编写属性配置失败测试**
 
 创建 `use-property-settings.test.ts`，使用 `ref<FormField | null>` 和带 `vi.fn()` 的 `PropertySettingActions`。测试非法 text 字段生成公共设置及两个数字设置，并验证：
 
@@ -52,7 +52,7 @@ expect(maxLengthSetting?.error).toBe('最小长度不能大于最大长度')
 
 从 `label` 配置调用 `onUpdate('候选人姓名')`，断言 `updateFieldProperties` 收到字段 ID 和 `{ label: '候选人姓名' }`。再把 ref 改成 number 字段，断言生成 `min`、`max` 且最大值配置显示“最小值不能大于最大值”。
 
-- [ ] **步骤 2：运行新测试确认失败**
+- [x] **步骤 2：运行新测试确认失败**
 
 运行：
 
@@ -62,7 +62,7 @@ pnpm test -- src/views/EditorView/use-property-settings.test.ts
 
 预期：FAIL，原因是 `usePropertySettings.ts` 和相关导出尚不存在。
 
-- [ ] **步骤 3：定义设置描述类型和 action 接口**
+- [x] **步骤 3：定义设置描述类型和 action 接口**
 
 在 `usePropertySettings.ts` 中定义并导出：
 
@@ -112,7 +112,7 @@ export type PropertySettingActions = {
 }
 ```
 
-- [ ] **步骤 4：实现设置工厂和组合式函数**
+- [x] **步骤 4：实现设置工厂和组合式函数**
 
 实现以下内部函数：
 
@@ -168,7 +168,7 @@ export function usePropertySettings(
 }
 ```
 
-- [ ] **步骤 5：运行属性配置测试确认通过**
+- [x] **步骤 5：运行属性配置测试确认通过**
 
 运行：
 
@@ -178,7 +178,7 @@ pnpm test -- src/views/EditorView/use-property-settings.test.ts
 
 预期：新测试全部通过。
 
-- [ ] **步骤 6：将 PropertyPanel 改为统一 settings 渲染**
+- [x] **步骤 6：将 PropertyPanel 改为统一 settings 渲染**
 
 在 `PropertyPanel.vue` 中：
 
@@ -202,7 +202,7 @@ function handleBooleanSettingChange(
 
 配置循环使用 `setting.id` 作为 key，required 行通过 `setting.control === 'boolean'` 添加现有布局类，ID 代码样式通过 `setting.id === 'id'` 添加。
 
-- [ ] **步骤 7：运行任务 1 验证**
+- [x] **步骤 7：运行任务 1 验证**
 
 运行：
 
@@ -221,7 +221,7 @@ pnpm build
 - 创建：`src/views/EditorView/PreviewPanel.test.ts`
 - 依赖现有：`src/stores/form-editor.ts`
 
-- [ ] **步骤 1：编写预览画布失败测试**
+- [x] **步骤 1：编写预览画布失败测试**
 
 创建 Pinia 并挂载 `PreviewPanel`。测试第一个 `.preview-field`：
 
@@ -237,7 +237,7 @@ expect(wrapper.findAll('.preview-field')[0]?.classes()).toContain('is-selected')
 
 测试使用 `global.stubs` 简化 `FormFieldRenderer`，但保留 PreviewPanel 自己的字段外层结构。拖拽索引行为由已有 `form-editor.test.ts` 的 `moveField` 用例保护，不在 jsdom 中模拟 Sortable 拖拽。
 
-- [ ] **步骤 2：运行预览画布测试确认失败**
+- [x] **步骤 2：运行预览画布测试确认失败**
 
 运行：
 
@@ -247,7 +247,7 @@ pnpm test -- src/views/EditorView/PreviewPanel.test.ts
 
 预期：FAIL，因为 `.preview-field` 和 `.preview-field-control` 尚不存在。
 
-- [ ] **步骤 3：实现字段画布结构和选择行为**
+- [x] **步骤 3：实现字段画布结构和选择行为**
 
 在 `PreviewPanel.vue` 中：
 
@@ -260,7 +260,7 @@ pnpm test -- src/views/EditorView/PreviewPanel.test.ts
 - 使用带 `inert` 的 `.preview-field-control` 包裹 `FormFieldRenderer`。
 - 删除 `FormFieldRenderer` 的 `@update:model-value` 监听，但继续传入当前 `modelValue` 以维持真实控件外观。
 
-- [ ] **步骤 4：接入 PreviewPanel 拖拽**
+- [x] **步骤 4：接入 PreviewPanel 拖拽**
 
 增加：
 
@@ -278,7 +278,7 @@ useDraggable(previewFieldListRef, undefined, {
 
 不把 Store 数组直接传给 `useDraggable`，确保排序写入仍只经过 Store action。
 
-- [ ] **步骤 5：增加画布交互样式**
+- [x] **步骤 5：增加画布交互样式**
 
 增加以下样式职责：
 
@@ -290,7 +290,7 @@ useDraggable(previewFieldListRef, undefined, {
 - `.preview-field .el-form-item` 将下边距归零，间距由列表统一控制。
 - Sortable ghost 使用较低透明度，拖拽中保持位置反馈。
 
-- [ ] **步骤 6：运行预览画布测试确认通过**
+- [x] **步骤 6：运行预览画布测试确认通过**
 
 运行：
 
@@ -300,7 +300,7 @@ pnpm test -- src/views/EditorView/PreviewPanel.test.ts
 
 预期：字段数量、inert 标记、点击选中和高亮断言全部通过。
 
-- [ ] **步骤 7：运行最终自动验证**
+- [x] **步骤 7：运行最终自动验证**
 
 运行：
 
@@ -311,7 +311,7 @@ pnpm build
 
 预期：全部测试通过；类型检查与生产构建成功；不出现超过 500 kB 的 JavaScript chunk 警告。
 
-- [ ] **步骤 8：审查实现范围**
+- [x] **步骤 8：审查实现范围**
 
 确认：
 
@@ -323,3 +323,12 @@ pnpm build
 - 当前未提交的 Schema 中文 issue 与回归测试被保留。
 
 实现代码在学习者审查通过前不自动提交。
+
+## 实施结果（2026-08-28）
+
+- 已新增 `usePropertySettings.ts`，PropertyPanel 保持单个 Vue 组件和统一 settings 循环。
+- settings 使用 `control` 可辨识联合，直接携带已解析值和 Store action 回调，没有恢复动态字段索引。
+- 已将 PreviewPanel 调整为非填写设计画布，真实控件通过 `inert` 和交互隔离样式保持正常外观但不可操作。
+- PreviewPanel 字段外层已接入点击／键盘选中、高亮和 `moveField` 拖拽排序。
+- 新增组合式函数与 PreviewPanel 两个高价值测试文件；最终 `pnpm test` 19/19 通过，`pnpm build` 成功，最大 JavaScript chunk 约 466 kB。
+- 实现代码保持未提交，等待学习者审查。

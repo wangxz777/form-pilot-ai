@@ -27,7 +27,8 @@ export const textFieldSchema = baseFieldSchema
       return true
     },
     {
-      message: 'minLength should be less than or equal to maxLength', // 错误信息
+      message: '最小长度不能大于最大长度',
+      path: ['maxLength'],
     }
   )
 
@@ -45,7 +46,8 @@ export const textareaFieldSchema = baseFieldSchema
       return true
     },
     {
-      message: 'minLength should be less than or equal to maxLength', // 错误信息
+      message: '最小长度不能大于最大长度',
+      path: ['maxLength'],
     }
   )
 
@@ -64,7 +66,8 @@ export const numberFieldSchema = baseFieldSchema
       return true
     },
     {
-      message: 'min should be less than or equal to max', // 错误信息
+      message: '最小值不能大于最大值',
+      path: ['max'],
     }
   )
 

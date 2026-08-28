@@ -2,73 +2,39 @@
   <aside class="editor-panel property-panel" aria-labelledby="property-title">
     <h2 id="property-title">字段属性</h2>
     <div v-if="selectedField" class="property-content">
-      <div class="property-item">
-        <span class="property-label">字段名称</span>
+      <div
+        v-for="setting in settings"
+        :key="setting.id"
+        class="property-item"
+        :class="{ 'property-required-row': setting.control === 'boolean' }"
+      >
+        <span class="property-label">{{ setting.label }}</span>
+
         <ElInput
-          :model-value="selectedField.label"
-          @update:model-value="updateFieldProperties(selectedField.id, { label: $event })"
+          v-if="setting.control === 'text'"
+          :class="{ 'property-value-code': setting.id === 'id' }"
+          :model-value="setting.modelValue"
+          :disabled="setting.readonly"
+          @update:model-value="setting.onUpdate?.($event)"
         />
-      </div>
 
-      <div class="property-item">
-        <span class="property-label">字段 ID</span>
-        <ElInput class="property-value-code" :model-value="selectedField.id" disabled />
-      </div>
-
-      <div class="property-item">
-        <span class="property-label">字段类型</span>
-        <ElInput :model-value="selectedField.type" disabled />
-      </div>
-
-      <div class="property-item property-required-row">
-        <span class="property-label">是否必填</span>
         <ElSwitch
-          :model-value="selectedField.required ?? false"
-          @update:model-value="handleRequiredChange"
+          v-else-if="setting.control === 'boolean'"
+          :model-value="setting.modelValue"
+          @update:model-value="handleBooleanSettingChange(setting, $event)"
         />
+
+        <ElInputNumber
+          v-else-if="setting.control === 'number'"
+          :model-value="setting.modelValue"
+          :min="setting.min"
+          @update:model-value="setting.onUpdate"
+        />
+
+        <p v-if="setting.control === 'number' && setting.error" class="property-error">
+          {{ setting.error }}
+        </p>
       </div>
-
-      <template v-if="selectedField.type === 'text' || selectedField.type === 'textarea'">
-        <div class="property-item">
-          <span class="property-label">最小长度</span>
-          <ElInputNumber
-            :model-value="selectedField.minLength"
-            :min="0"
-            @update:model-value="
-              updateTextFieldConstraints(selectedField.id, { minLength: $event })
-            "
-          />
-        </div>
-
-        <div class="property-item">
-          <span class="property-label">最大长度</span>
-          <ElInputNumber
-            :model-value="selectedField.maxLength"
-            :min="0"
-            @update:model-value="
-              updateTextFieldConstraints(selectedField.id, { maxLength: $event })
-            "
-          />
-        </div>
-      </template>
-
-      <template v-else-if="selectedField.type === 'number'">
-        <div class="property-item">
-          <span class="property-label">最小值</span>
-          <ElInputNumber
-            :model-value="selectedField.min"
-            @update:model-value="updateNumberFieldConstraints(selectedField.id, { min: $event })"
-          />
-        </div>
-
-        <div class="property-item">
-          <span class="property-label">最大值</span>
-          <ElInputNumber
-            :model-value="selectedField.max"
-            @update:model-value="updateNumberFieldConstraints(selectedField.id, { max: $event })"
-          />
-        </div>
-      </template>
 
       <ElButton type="danger" @click="removeField(selectedField.id)">
         <SvgIcon name="delete" />
@@ -85,6 +51,10 @@ import { ElSwitch, ElInput, ElInputNumber, ElButton } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon.vue'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
+import {
+  usePropertySettings,
+  type BooleanSetting,
+} from './usePropertySettings'
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
@@ -95,9 +65,18 @@ const {
   removeField,
 } = formEditorStore
 
-function handleRequiredChange(value: string | number | boolean) {
-  if (!selectedField.value || typeof value !== 'boolean') return
-  updateFieldProperties(selectedField.value.id, { required: value })
+const { settings } = usePropertySettings(selectedField, {
+  updateFieldProperties,
+  updateTextFieldConstraints,
+  updateNumberFieldConstraints,
+})
+
+function handleBooleanSettingChange(
+  setting: BooleanSetting,
+  value: string | number | boolean
+) {
+  if (typeof value !== 'boolean') return
+  setting.onUpdate(value)
 }
 </script>
 
@@ -163,6 +142,13 @@ h2 {
   color: #909399;
   font-size: 14px;
   text-align: center;
+}
+
+.property-error {
+  margin: 0;
+  color: #f56c6c;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 @media (max-width: 960px) {

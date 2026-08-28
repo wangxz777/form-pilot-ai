@@ -3,31 +3,43 @@
     <h2 id="preview-title">实时预览</h2>
     <section class="form-canvas" aria-labelledby="form-title">
       <h3 id="form-title">{{ formSchema.title }}</h3>
-      <p class="form-description">请填写以下信息</p>
+      <p class="form-description">点击选择字段，拖拽调整顺序</p>
       <ElForm :model="formValues" :rules="formRules">
-        <ElFormItem
-          v-for="field in formSchema.fields"
-          :key="field.id"
-          :prop="field.id"
-        >
-          <template #label>
-            {{ field.label }}
-          </template>
-          <FormFieldRenderer
-            :field="field"
-            :model-value="formValues[field.id]"
-            @update:model-value="(v) => updateFormValue(field.id, v)"
+        <div ref="previewFieldListRef" class="preview-field-list">
+          <div
+            v-for="field in formSchema.fields"
+            :key="field.id"
+            class="preview-field"
+            :class="{ 'is-selected': selectedFieldId === field.id }"
+            role="button"
+            tabindex="0"
+            :aria-pressed="selectedFieldId === field.id"
             @click="selectField(field.id)"
-          />
-        </ElFormItem>
+            @keydown.enter="selectField(field.id)"
+            @keydown.space.prevent="selectField(field.id)"
+          >
+            <ElFormItem :prop="field.id">
+              <template #label>
+                {{ field.label }}
+              </template>
+              <div class="preview-field-control" inert>
+                <FormFieldRenderer
+                  :field="field"
+                  :model-value="formValues[field.id]"
+                />
+              </div>
+            </ElFormItem>
+          </div>
+        </div>
       </ElForm>
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useDraggable } from 'vue-draggable-plus'
 
 import FormFieldRenderer from '@/components/formRenderer/FormFieldRenderer.vue'
 import { ElForm, ElFormItem } from 'element-plus'
@@ -36,9 +48,18 @@ import { useFormEditorStore } from '@/stores/form-editor.ts'
 import { createFormRules } from '@/utils/form-rules'
 
 const formEditorStore = useFormEditorStore()
-const { formSchema, formValues } = storeToRefs(formEditorStore)
-const { updateFormValue, selectField } = formEditorStore
+const { formSchema, formValues, selectedFieldId } = storeToRefs(formEditorStore)
+const { selectField, moveField } = formEditorStore
 const formRules = computed(() => createFormRules(formSchema.value.fields))
+const previewFieldListRef = ref<HTMLElement | null>(null)
+
+useDraggable(previewFieldListRef, undefined, {
+  animation: 150,
+  onUpdate(event) {
+    if (event.oldIndex === undefined || event.newIndex === undefined) return
+    moveField(event.oldIndex, event.newIndex)
+  },
+})
 </script>
 
 <style scoped lang="scss">
@@ -83,8 +104,56 @@ h2 {
   text-align: left;
 }
 
-.form-canvas :deep(.el-form-item) {
-  margin-bottom: 20px;
+.preview-field-list {
+  display: grid;
+  gap: 10px;
+}
+
+.preview-field {
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: grab;
+  outline: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.preview-field:hover,
+.preview-field:focus-visible {
+  background: #f5f9ff;
+  border-color: #a0cfff;
+}
+
+.preview-field:focus-visible {
+  box-shadow: 0 0 0 2px rgb(64 158 255 / 16%);
+}
+
+.preview-field.is-selected {
+  background: #ecf5ff;
+  border-color: #409eff;
+  box-shadow: 0 0 0 1px rgb(64 158 255 / 12%);
+}
+
+.preview-field:active {
+  cursor: grabbing;
+}
+
+.preview-field.sortable-ghost {
+  opacity: 0.45;
+}
+
+.preview-field-control {
+  width: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.preview-field :deep(.el-form-item) {
+  margin-bottom: 0;
 }
 
 .form-canvas :deep(.el-select),

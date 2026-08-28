@@ -89,6 +89,54 @@ describe('numberFieldSchema', () => {
   })
 })
 
+describe('field constraint issue metadata', () => {
+  it('为反向范围提供属性面板可定位的中文错误', () => {
+    const cases = [
+      {
+        result: textFieldSchema.safeParse({
+          id: 'name',
+          label: 'Name',
+          type: 'text',
+          minLength: 20,
+          maxLength: 3,
+        }),
+        message: '最小长度不能大于最大长度',
+        path: ['maxLength'],
+      },
+      {
+        result: textareaFieldSchema.safeParse({
+          id: 'description',
+          label: 'Description',
+          type: 'textarea',
+          minLength: 200,
+          maxLength: 10,
+        }),
+        message: '最小长度不能大于最大长度',
+        path: ['maxLength'],
+      },
+      {
+        result: numberFieldSchema.safeParse({
+          id: 'age',
+          label: 'Age',
+          type: 'number',
+          min: 65,
+          max: 18,
+        }),
+        message: '最小值不能大于最大值',
+        path: ['max'],
+      },
+    ]
+
+    cases.forEach(({ result, message, path }) => {
+      expect(result.success).toBe(false)
+
+      if (!result.success) {
+        expect(result.error.issues).toContainEqual(expect.objectContaining({ message, path }))
+      }
+    })
+  })
+})
+
 describe('option field schemas', () => {
   it('验证 select 和 radio 的选项约束', () => {
     const validSelect = selectFieldSchema.safeParse({
