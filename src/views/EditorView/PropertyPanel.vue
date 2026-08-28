@@ -1,6 +1,16 @@
 <template>
   <aside class="editor-panel property-panel" aria-labelledby="property-title">
-    <h2 id="property-title">字段属性</h2>
+    <div v-if="selectedFieldMeta" class="property-heading">
+      <span class="property-type-icon" aria-hidden="true">
+        <SvgIcon :name="selectedFieldMeta.icon" />
+      </span>
+      <span class="property-heading-copy">
+        <h2 id="property-title">{{ selectedFieldMeta.label }}</h2>
+        <span class="property-type-description">{{ selectedFieldMeta.description }}</span>
+      </span>
+    </div>
+    <h2 v-else id="property-title">字段属性</h2>
+
     <div v-if="selectedField" class="property-content">
       <div
         v-for="setting in settings"
@@ -12,9 +22,7 @@
 
         <ElInput
           v-if="setting.control === 'text'"
-          :class="{ 'property-value-code': setting.id === 'id' }"
           :model-value="setting.modelValue"
-          :disabled="setting.readonly"
           @update:model-value="setting.onUpdate?.($event)"
         />
 
@@ -73,15 +81,21 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { ElSwitch, ElInput, ElInputNumber, ElButton } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon.vue'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
 import { usePropertySettings, type BooleanSetting } from './usePropertySettings'
+import { fieldTypeMeta } from './field-type-meta'
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
+const selectedFieldMeta = computed(() => {
+  const field = selectedField.value
+  return field ? fieldTypeMeta[field.type] : null
+})
 const {
   updateFieldProperties,
   updateTextFieldConstraints,
@@ -119,6 +133,40 @@ h2 {
   font-weight: 600;
 }
 
+.property-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.property-type-icon {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  color: #4e5969;
+  place-items: center;
+  background: #f7f8fa;
+  border: 1px solid #c9cdd4;
+  border-radius: 6px;
+}
+
+.property-type-icon :deep(.svg-icon) {
+  width: 20px;
+  height: 20px;
+}
+
+.property-heading-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.property-type-description {
+  color: #909399;
+  font-size: 13px;
+}
+
 .property-content {
   display: grid;
   gap: 20px;
@@ -149,12 +197,6 @@ h2 {
   background: #ffffff;
   border: 1px solid #dcdfe6;
   border-radius: 5px;
-}
-
-.property-value-code {
-  color: #606266;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
-  font-size: 12px;
 }
 
 .property-required-row {

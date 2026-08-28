@@ -22,7 +22,9 @@
         >
           <span class="field-drag" aria-hidden="true">⠿</span>
           <span class="field-card">
-            <span class="field-type-icon" aria-hidden="true">{{ fieldTypeMeta[field.type] }}</span>
+            <span class="field-type-icon" aria-hidden="true">
+              <SvgIcon :name="fieldTypeMeta[field.type].icon" />
+            </span>
             <span class="field-name">{{ field.label }}</span>
             <span class="field-grip" aria-hidden="true">≡</span>
           </span>
@@ -40,20 +42,12 @@ import { storeToRefs } from 'pinia'
 import { ElButton } from 'element-plus'
 
 import AddFieldDialog from './AddFieldDialog.vue'
+import SvgIcon from '@/components/SvgIcon.vue'
 import { useDraggable } from 'vue-draggable-plus'
 import { useFormEditorStore } from '@/stores/form-editor.ts'
+import { fieldTypeMeta } from './field-type-meta'
 
 import type { FormField } from '@/types/form-schema'
-
-const fieldTypeMeta: Record<FormField['type'], string> = {
-  text: 'T',
-  number: '123',
-  textarea: '¶',
-  select: '⌄',
-  radio: '◉',
-  checkbox: '✓',
-  date: '□',
-}
 
 const formEditorStore = useFormEditorStore()
 const { formSchema, selectedFieldId } = storeToRefs(formEditorStore)
@@ -175,6 +169,11 @@ h2 {
   background: #f7f8fa;
   border: 1px solid #c9cdd4;
   border-radius: 5px;
+}
+
+.field-type-icon :deep(.svg-icon) {
+  width: 16px;
+  height: 16px;
 }
 
 .field-name {

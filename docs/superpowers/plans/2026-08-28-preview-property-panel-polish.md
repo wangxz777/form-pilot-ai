@@ -36,7 +36,7 @@
 - 修改：`src/views/EditorView/EditorPanel.vue`
 - 修改：`src/views/EditorView/PropertyPanel.vue`
 
-- [ ] **步骤 1：建立完整的字段类型元数据映射**
+- [x] **步骤 1：建立完整的字段类型元数据映射**
 
 ```ts
 export type FieldTypeMeta = {
@@ -94,11 +94,11 @@ export const fieldTypeMeta: Record<FormField['type'], FieldTypeMeta> = {
 export const fieldTypeOptions = Object.values(fieldTypeMeta)
 ```
 
-- [ ] **步骤 2：加入七个 Element Plus 风格 SVG**
+- [x] **步骤 2：加入七个 Element Plus 风格 SVG**
 
 每个文件使用 `viewBox="0 0 1024 1024"` 与 `fill="currentColor"`。从当前锁定版本 `@element-plus/icons-vue@2.3.2` 的本地构建产物复制对应图形路径，映射为：文本 `EditPen`、数字 `DataAnalysis`、多行文本 `Document`、下拉选择 `ArrowDownBold`、单选 `CircleCheck`、复选 `Finished`、日期 `Calendar`。
 
-- [ ] **步骤 3：三个入口统一使用共享元数据与 SvgIcon**
+- [x] **步骤 3：三个入口统一使用共享元数据与 SvgIcon**
 
 `AddFieldDialog.vue`、`EditorPanel.vue` 和 `PropertyPanel.vue` 均通过：
 
@@ -120,7 +120,7 @@ export const fieldTypeOptions = Object.values(fieldTypeMeta)
 </div>
 ```
 
-- [ ] **步骤 4：运行生产构建确认 SVG sprite 与类型通过**
+- [x] **步骤 4：运行生产构建确认 SVG sprite 与类型通过**
 
 运行：`pnpm build`
 
@@ -133,7 +133,7 @@ export const fieldTypeOptions = Object.values(fieldTypeMeta)
 - 修改：`src/views/EditorView/use-property-settings.test.ts`
 - 修改：`src/views/EditorView/PreviewPanel.vue`
 
-- [ ] **步骤 1：先修改关键设置契约测试**
+- [x] **步骤 1：先修改关键设置契约测试**
 
 将文本字段和数字字段的期望设置 ID 改为：
 
@@ -155,17 +155,17 @@ expect(settings.value.map((setting) => setting.id)).toEqual([
 ])
 ```
 
-- [ ] **步骤 2：运行单个测试确认当前实现不满足新契约**
+- [x] **步骤 2：运行单个测试确认当前实现不满足新契约**
 
 运行：`pnpm test -- src/views/EditorView/use-property-settings.test.ts`
 
 预期：测试因实际结果仍含 `id`、`type` 而失败。
 
-- [ ] **步骤 3：从公共设置中删除 ID 与类型项**
+- [x] **步骤 3：从公共设置中删除 ID 与类型项**
 
 `createBaseSettings` 仅返回 `label` 和 `required` 配置；保留现有类型分支、约束错误和选项设置逻辑。
 
-- [ ] **步骤 4：移除 PreviewPanel 的校验依赖与宽度上限**
+- [x] **步骤 4：移除 PreviewPanel 的校验依赖与宽度上限**
 
 模板改为不传规则和字段 prop：
 
@@ -176,7 +176,7 @@ expect(settings.value.map((setting) => setting.id)).toEqual([
 
 脚本删除 `computed`、`createFormRules` 和 `formRules`；样式将 `.form-canvas` 改为 `width: 100%`。
 
-- [ ] **步骤 5：运行关键验证**
+- [x] **步骤 5：运行关键验证**
 
 运行：`pnpm test && pnpm build`
 

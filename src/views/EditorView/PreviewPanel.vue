@@ -20,7 +20,7 @@
         {{ formSchema.title }}
       </h3>
       <p class="form-description">点击选择字段，拖拽调整顺序</p>
-      <ElForm :model="formValues" :rules="formRules">
+      <ElForm :model="formValues">
         <div ref="previewFieldListRef" class="preview-field-list">
           <div
             v-for="field in formSchema.fields"
@@ -34,7 +34,7 @@
             @keydown.enter="selectField(field.id)"
             @keydown.space.prevent="selectField(field.id)"
           >
-            <ElFormItem :prop="field.id">
+            <ElFormItem>
               <template #label>
                 {{ field.label }}
               </template>
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDraggable } from 'vue-draggable-plus'
 
@@ -61,12 +61,10 @@ import FormFieldRenderer from '@/components/formRenderer/FormFieldRenderer.vue'
 import { ElForm, ElFormItem } from 'element-plus'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
-import { createFormRules } from '@/utils/form-rules'
 
 const formEditorStore = useFormEditorStore()
 const { formSchema, formValues, selectedFieldId } = storeToRefs(formEditorStore)
 const { selectField, moveField, updateFormTitle } = formEditorStore
-const formRules = computed(() => createFormRules(formSchema.value.fields))
 const previewFieldListRef = ref<HTMLElement | null>(null)
 const titleInputRef = ref<HTMLInputElement | null>(null)
 const isEditingTitle = ref(false)
@@ -101,7 +99,7 @@ useDraggable(previewFieldListRef, undefined, {
 }
 
 .form-canvas {
-  width: min(100%, 760px);
+  width: 100%;
   min-height: 420px;
   margin: 0 auto;
   padding: 20px 20px 24px;

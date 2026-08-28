@@ -1,6 +1,7 @@
 <template>
   <ElInputNumber
     v-model="numberValue"
+    align="left"
     :aria-label="field.label"
     :max="field.max"
     :min="field.min"

@@ -19,7 +19,9 @@
         :aria-pressed="selectedType === option.type"
         @click="selectedType = option.type"
       >
-        <span class="field-type-icon" aria-hidden="true">{{ option.icon }}</span>
+        <span class="field-type-icon" aria-hidden="true">
+          <SvgIcon :name="option.icon" />
+        </span>
         <span class="field-type-copy">
           <span class="field-type-name">{{ option.label }}</span>
           <span class="field-type-description">{{ option.description }}</span>
@@ -41,24 +43,9 @@
 import { ref } from 'vue'
 import { ElButton, ElDialog } from 'element-plus'
 
+import SvgIcon from '@/components/SvgIcon.vue'
+import { fieldTypeOptions } from './field-type-meta'
 import type { FormField } from '@/types/form-schema'
-
-type FieldTypeOption = {
-  type: FormField['type']
-  label: string
-  description: string
-  icon: string
-}
-
-const fieldTypeOptions: FieldTypeOption[] = [
-  { type: 'text', label: '文本输入', description: '单行文本内容', icon: 'T' },
-  { type: 'number', label: '数字输入', description: '数值与范围', icon: '123' },
-  { type: 'textarea', label: '多行文本', description: '较长的文本内容', icon: '¶' },
-  { type: 'select', label: '下拉选择', description: '从列表中选择一项', icon: '⌄' },
-  { type: 'radio', label: '单选框', description: '平铺显示单选项', icon: '◉' },
-  { type: 'checkbox', label: '复选框', description: '是或否的选项', icon: '✓' },
-  { type: 'date', label: '日期', description: '选择一个日期', icon: '□' },
-]
 
 const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{
@@ -132,6 +119,11 @@ function resetSelection() {
   place-items: center;
   border: 1px solid #b8bec8;
   border-radius: 6px;
+}
+
+.field-type-icon :deep(.svg-icon) {
+  width: 20px;
+  height: 20px;
 }
 
 .field-type-copy {

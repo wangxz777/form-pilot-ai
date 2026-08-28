@@ -28,8 +28,6 @@ describe('usePropertySettings', () => {
 
     expect(settings.value.map((setting) => setting.id)).toEqual([
       'label',
-      'id',
-      'type',
       'required',
       'minLength',
       'maxLength',
@@ -62,8 +60,6 @@ describe('usePropertySettings', () => {
 
     expect(settings.value.map((setting) => setting.id)).toEqual([
       'label',
-      'id',
-      'type',
       'required',
       'min',
       'max',

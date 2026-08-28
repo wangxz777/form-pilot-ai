@@ -16,7 +16,6 @@ export type TextSetting = {
   label: string
   control: 'text'
   modelValue: string
-  readonly?: boolean
   onUpdate?: (value: string) => void
 }
 
@@ -85,20 +84,6 @@ function createBaseSettings(field: FormField, actions: PropertySettingActions): 
       control: 'text',
       modelValue: field.label,
       onUpdate: (value) => actions.updateFieldProperties(field.id, { label: value }),
-    },
-    {
-      id: 'id',
-      label: '字段 ID',
-      control: 'text',
-      modelValue: field.id,
-      readonly: true,
-    },
-    {
-      id: 'type',
-      label: '字段类型',
-      control: 'text',
-      modelValue: field.type,
-      readonly: true,
     },
     {
       id: 'required',
