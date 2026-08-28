@@ -6,6 +6,7 @@
       </div>
 
       <nav class="toolbar-actions" aria-label="表单操作">
+        <ElButton @click="saveDraft">保存草稿</ElButton>
         <ElButton @click="openImportPicker">导入</ElButton>
         <ElButton @click="exportFormSchema">导出</ElButton>
         <ElButton type="primary">AI 生成</ElButton>
@@ -36,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { ElButton, ElMessage } from 'element-plus'
 
 import PreviewPanel from './PreviewPanel.vue'
@@ -44,6 +45,7 @@ import EditorPanel from './EditorPanel.vue'
 import PropertyPanel from './PropertyPanel.vue'
 import SchemaConfirmDialog from './SchemaConfirmDialog.vue'
 import { useFormEditorStore } from '@/stores/form-editor'
+import { loadFormDraft, saveFormDraft } from '@/utils/form-draft'
 import { parseFormSchemaJson, serializeFormSchemaJson } from '@/utils/form-schema-json'
 import type { FormSchema } from '@/types/form-schema'
 
@@ -120,6 +122,33 @@ function exportFormSchema() {
 
   ElMessage.success('表单已导出')
 }
+
+function saveDraft() {
+  const result = saveFormDraft(localStorage, formEditorStore.formSchema)
+
+  if (!result.success) {
+    ElMessage.error(result.message)
+    return
+  }
+
+  ElMessage.success('草稿已保存')
+}
+
+function restoreDraft() {
+  const result = loadFormDraft(localStorage)
+
+  if (!result.success) {
+    ElMessage.error(result.message)
+    return
+  }
+
+  if (!result.data) return
+
+  replaceFormSchema(result.data)
+  ElMessage.success('已恢复本地草稿')
+}
+
+onMounted(restoreDraft)
 </script>
 
 <style scoped lang="scss">
