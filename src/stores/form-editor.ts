@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia'
 import { reactive, ref, computed } from 'vue'
 
-import type { FormSchema, FormValue, NumberField, TextField, TextareaField } from '@/types/form-schema'
+import type {
+  FormSchema,
+  FormValue,
+  NumberField,
+  TextField,
+  TextareaField,
+} from '@/types/form-schema'
 import { createFormValues, getDefaultValue } from '@/utils/form-values'
 import { jobApplicationSchema } from '@/data/job-application-schema'
 
@@ -88,6 +94,10 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     formValues[fieldId] = value
   }
 
+  function updateFormTitle(title: string) {
+    formSchema.title = title
+  }
+
   function selectField(fieldId: string) {
     selectedFieldId.value = fieldId
   }
@@ -148,12 +158,60 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     formSchema.fields.splice(newIndex, 0, field)
   }
 
+  function addFieldOption(fieldId: string) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field || (field.type !== 'select' && field.type !== 'radio')) {
+      return
+    }
+
+    field.options.push({
+      label: `选项 ${field.options.length + 1}`,
+      value: crypto.randomUUID(),
+    })
+  }
+
+  function updateFieldOptionLabel(fieldId: string, optionValue: string, label: string) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field || (field.type !== 'select' && field.type !== 'radio')) {
+      return
+    }
+
+    const option = field.options.find((option) => option.value === optionValue)
+
+    if (!option) return
+
+    option.label = label
+  }
+
+  function removeFieldOption(fieldId: string, optionValue: string) {
+    const field = formSchema.fields.find((field) => field.id === fieldId)
+
+    if (!field || (field.type !== 'select' && field.type !== 'radio')) {
+      return
+    }
+
+    if (field.options.length <= 1) return
+
+    const optionIndex = field.options.findIndex((option) => option.value === optionValue)
+
+    if (optionIndex < 0) return
+
+    field.options.splice(optionIndex, 1)
+
+    if (formValues[fieldId] === optionValue) {
+      formValues[fieldId] = ''
+    }
+  }
+
   return {
     formSchema,
     formValues,
     selectedFieldId,
     selectedField,
     updateFormValue,
+    updateFormTitle,
     selectField,
     updateFieldProperties,
     updateTextFieldConstraints,
@@ -161,5 +219,8 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     addField,
     removeField,
     moveField,
+    addFieldOption,
+    updateFieldOptionLabel,
+    removeFieldOption,
   }
 })

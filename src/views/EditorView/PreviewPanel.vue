@@ -1,8 +1,24 @@
 <template>
-  <main class="preview-panel" aria-labelledby="preview-title">
-    <h2 id="preview-title">实时预览</h2>
+  <main class="preview-panel" aria-label="表单设计画布">
     <section class="form-canvas" aria-labelledby="form-title">
-      <h3 id="form-title">{{ formSchema.title }}</h3>
+      <input
+        v-if="isEditingTitle"
+        id="form-title"
+        ref="titleInputRef"
+        v-model="titleDraft"
+        class="form-title-input"
+        aria-label="表单标题"
+        @blur="saveFormTitle"
+      />
+      <h3
+        v-else
+        id="form-title"
+        class="form-title"
+        title="双击编辑表单标题"
+        @dblclick="startEditingTitle"
+      >
+        {{ formSchema.title }}
+      </h3>
       <p class="form-description">点击选择字段，拖拽调整顺序</p>
       <ElForm :model="formValues" :rules="formRules">
         <div ref="previewFieldListRef" class="preview-field-list">
@@ -37,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDraggable } from 'vue-draggable-plus'
 
@@ -49,9 +65,26 @@ import { createFormRules } from '@/utils/form-rules'
 
 const formEditorStore = useFormEditorStore()
 const { formSchema, formValues, selectedFieldId } = storeToRefs(formEditorStore)
-const { selectField, moveField } = formEditorStore
+const { selectField, moveField, updateFormTitle } = formEditorStore
 const formRules = computed(() => createFormRules(formSchema.value.fields))
 const previewFieldListRef = ref<HTMLElement | null>(null)
+const titleInputRef = ref<HTMLInputElement | null>(null)
+const isEditingTitle = ref(false)
+const titleDraft = ref('')
+
+function startEditingTitle() {
+  titleDraft.value = formSchema.value.title
+  isEditingTitle.value = true
+  nextTick(() => titleInputRef.value?.focus())
+}
+
+function saveFormTitle() {
+  const title = titleDraft.value.trim()
+
+  if (title) updateFormTitle(title)
+
+  isEditingTitle.value = false
+}
 
 useDraggable(previewFieldListRef, undefined, {
   animation: 150,
@@ -67,18 +100,11 @@ useDraggable(previewFieldListRef, undefined, {
   background: #f5f7fa;
 }
 
-h2 {
-  margin: 0;
-  color: #303133;
-  font-size: 18px;
-  font-weight: 600;
-}
-
 .form-canvas {
   width: min(100%, 760px);
   min-height: 420px;
-  margin: 16px auto 0;
-  padding: 28px 24px 32px;
+  margin: 0 auto;
+  padding: 20px 20px 24px;
   text-align: center;
   background: #ffffff;
   border: 1px solid #e4e7ed;
@@ -86,11 +112,28 @@ h2 {
   box-shadow: 0 8px 24px rgb(31 45 61 / 9%);
 }
 
-.form-canvas h3 {
+.form-title,
+.form-title-input {
   margin: 0;
   color: #1d2129;
-  font-size: 28px;
+  font-size: 24px;
+  font-weight: 600;
   line-height: 1.4;
+}
+
+.form-title {
+  cursor: text;
+}
+
+.form-title-input {
+  width: min(100%, 360px);
+  padding: 0 8px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #409eff;
+  border-radius: 4px;
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(64 158 255 / 12%);
 }
 
 .form-description {
@@ -100,7 +143,7 @@ h2 {
 }
 
 .form-canvas :deep(.el-form) {
-  margin-top: 24px;
+  margin-top: 18px;
   text-align: left;
 }
 
@@ -170,7 +213,7 @@ h2 {
 @media (max-width: 520px) {
   .form-canvas {
     min-height: 320px;
-    padding: 24px 16px;
+    padding: 18px 14px 22px;
   }
 }
 </style>

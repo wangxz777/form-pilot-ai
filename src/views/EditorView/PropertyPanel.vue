@@ -31,6 +31,33 @@
           @update:model-value="setting.onUpdate"
         />
 
+        <div v-else-if="setting.control === 'options'" class="property-options">
+          <div
+            v-for="(option, optionIndex) in setting.options"
+            :key="option.value"
+            class="property-option"
+          >
+            <div class="property-option-input">
+              <ElInput
+                :model-value="option.label"
+                @update:model-value="setting.onUpdateLabel(option.value, $event)"
+              />
+              <p v-if="setting.errors[optionIndex]" class="property-error">
+                {{ setting.errors[optionIndex] }}
+              </p>
+            </div>
+
+            <ElButton
+              :disabled="setting.options.length <= 1"
+              @click="setting.onRemove(option.value)"
+            >
+              删除
+            </ElButton>
+          </div>
+
+          <ElButton plain @click="setting.onAdd()"> 添加选项 </ElButton>
+        </div>
+
         <p v-if="setting.control === 'number' && setting.error" class="property-error">
           {{ setting.error }}
         </p>
@@ -51,10 +78,7 @@ import { ElSwitch, ElInput, ElInputNumber, ElButton } from 'element-plus'
 import SvgIcon from '@/components/SvgIcon.vue'
 
 import { useFormEditorStore } from '@/stores/form-editor.ts'
-import {
-  usePropertySettings,
-  type BooleanSetting,
-} from './usePropertySettings'
+import { usePropertySettings, type BooleanSetting } from './usePropertySettings'
 
 const formEditorStore = useFormEditorStore()
 const { selectedField } = storeToRefs(formEditorStore)
@@ -62,6 +86,9 @@ const {
   updateFieldProperties,
   updateTextFieldConstraints,
   updateNumberFieldConstraints,
+  addFieldOption,
+  updateFieldOptionLabel,
+  removeFieldOption,
   removeField,
 } = formEditorStore
 
@@ -69,12 +96,12 @@ const { settings } = usePropertySettings(selectedField, {
   updateFieldProperties,
   updateTextFieldConstraints,
   updateNumberFieldConstraints,
+  addFieldOption,
+  updateFieldOptionLabel,
+  removeFieldOption,
 })
 
-function handleBooleanSettingChange(
-  setting: BooleanSetting,
-  value: string | number | boolean
-) {
+function handleBooleanSettingChange(setting: BooleanSetting, value: string | number | boolean) {
   if (typeof value !== 'boolean') return
   setting.onUpdate(value)
 }
@@ -149,6 +176,24 @@ h2 {
   color: #f56c6c;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.property-options {
+  display: grid;
+  gap: 10px;
+}
+
+.property-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.property-option-input {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 
 @media (max-width: 960px) {

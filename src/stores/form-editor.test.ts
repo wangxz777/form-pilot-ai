@@ -81,6 +81,36 @@ describe('useFormEditorStore', () => {
     }
   })
 
+  it('维护选择字段选项并清理被删除选项的旧值', () => {
+    store.addField('select')
+    const selectField = store.formSchema.fields.at(-1)
+    if (!selectField || selectField.type !== 'select') throw new Error('应创建下拉选择字段')
+
+    try {
+      const originalOption = selectField.options[0]
+      if (!originalOption) throw new Error('选择字段至少需要一个选项')
+
+      store.removeFieldOption(selectField.id, originalOption.value)
+      expect(selectField.options).toHaveLength(1)
+
+      store.addFieldOption(selectField.id)
+      const addedOption = selectField.options.at(-1)
+      if (!addedOption) throw new Error('新增选项后列表不应为空')
+
+      store.updateFieldOptionLabel(selectField.id, addedOption.value, '远程办公')
+      expect(addedOption.label).toBe('远程办公')
+
+      store.updateFormValue(selectField.id, addedOption.value)
+      store.removeFieldOption(selectField.id, addedOption.value)
+
+      expect(selectField.options).toHaveLength(1)
+      expect(store.formValues[selectField.id]).toBe('')
+      expect(formSchema.safeParse(store.formSchema).success).toBe(true)
+    } finally {
+      store.removeField(selectField.id)
+    }
+  })
+
   it('创建七种合法字段并初始化默认值和选中状态', () => {
     const fieldTypes: FormField['type'][] = [
       'text',

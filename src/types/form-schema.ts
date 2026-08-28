@@ -8,7 +8,7 @@ const baseFieldSchema = z.object({
 })
 
 const optionSchema = z.object({
-  label: z.string().trim().min(1),
+  label: z.string().trim().min(1, { message: '选项名称不能为空' }),
   value: z.string().trim().min(1),
 })
 

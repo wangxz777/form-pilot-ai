@@ -20,6 +20,9 @@ describe('usePropertySettings', () => {
       updateFieldProperties: vi.fn(),
       updateTextFieldConstraints: vi.fn(),
       updateNumberFieldConstraints: vi.fn(),
+      addFieldOption: vi.fn(),
+      updateFieldOptionLabel: vi.fn(),
+      removeFieldOption: vi.fn(),
     }
     const { settings } = usePropertySettings(selectedField, actions)
 

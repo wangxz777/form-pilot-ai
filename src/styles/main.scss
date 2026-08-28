@@ -93,7 +93,7 @@ select {
 
 .editor-toolbar {
   display: flex;
-  flex: 0 0 72px;
+  flex: 0 0 56px;
   align-items: center;
   justify-content: space-between;
   min-width: 0;
@@ -110,7 +110,6 @@ select {
 
 .toolbar-identity {
   min-width: 0;
-  gap: 20px;
 }
 
 .toolbar-brand {
@@ -119,38 +118,6 @@ select {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.03em;
-}
-
-.toolbar-divider {
-  width: 1px;
-  height: 20px;
-  background: #dcdfe6;
-}
-
-.toolbar-form-name {
-  overflow: hidden;
-  margin: 0;
-  color: #303133;
-  font-size: 17px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.toolbar-save-status {
-  flex: none;
-  color: #67c23a;
-  font-size: 14px;
-}
-
-.toolbar-save-status::before {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 7px;
-  content: '';
-  background: #67c23a;
-  border-radius: 50%;
 }
 
 .toolbar-actions {
@@ -174,13 +141,8 @@ select {
     flex: 0 0 auto;
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
-    padding: 18px 20px;
-  }
-
-  .toolbar-identity {
-    flex-wrap: wrap;
     gap: 12px;
+    padding: 12px 20px;
   }
 
   .toolbar-actions {
@@ -193,10 +155,6 @@ select {
 @media (max-width: 520px) {
   .home-card {
     padding: 36px 24px;
-  }
-
-  .toolbar-divider {
-    display: none;
   }
 
   .toolbar-actions .el-button {

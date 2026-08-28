@@ -6,6 +6,9 @@ import {
   type NumberField,
   type TextField,
   type TextareaField,
+  type FieldOption,
+  type RadioField,
+  type SelectField,
 } from '@/types/form-schema'
 
 export type TextSetting = {
@@ -35,7 +38,18 @@ export type NumberSetting = {
   onUpdate: (value: number | undefined) => void
 }
 
-export type PropertySetting = TextSetting | BooleanSetting | NumberSetting
+export type OptionsSetting = {
+  id: string
+  label: string
+  control: 'options'
+  options: FieldOption[]
+  errors: Array<string | undefined>
+  onAdd: () => void
+  onUpdateLabel: (optionValue: string, label: string) => void
+  onRemove: (optionValue: string) => void
+}
+
+export type PropertySetting = TextSetting | BooleanSetting | NumberSetting | OptionsSetting
 
 export type PropertySettingActions = {
   updateFieldProperties: (
@@ -50,12 +64,12 @@ export type PropertySettingActions = {
     fieldId: string,
     constraints: { min?: number; max?: number }
   ) => void
+  addFieldOption: (fieldId: string) => void
+  updateFieldOptionLabel: (fieldId: string, optionValue: string, label: string) => void
+  removeFieldOption: (fieldId: string, optionValue: string) => void
 }
 
-function getConstraintError(
-  field: FormField,
-  path: 'maxLength' | 'max'
-): string | undefined {
+function getConstraintError(field: FormField, path: 'maxLength' | 'max'): string | undefined {
   const result = formFieldSchema.safeParse(field)
 
   if (result.success) return undefined
@@ -63,10 +77,7 @@ function getConstraintError(
   return result.error.issues.find((issue) => issue.path[0] === path)?.message
 }
 
-function createBaseSettings(
-  field: FormField,
-  actions: PropertySettingActions
-): PropertySetting[] {
+function createBaseSettings(field: FormField, actions: PropertySettingActions): PropertySetting[] {
   return [
     {
       id: 'label',
@@ -110,8 +121,7 @@ function createTextSettings(
       control: 'number',
       modelValue: field.minLength,
       min: 0,
-      onUpdate: (value) =>
-        actions.updateTextFieldConstraints(field.id, { minLength: value }),
+      onUpdate: (value) => actions.updateTextFieldConstraints(field.id, { minLength: value }),
     },
     {
       id: 'maxLength',
@@ -120,8 +130,7 @@ function createTextSettings(
       modelValue: field.maxLength,
       min: 0,
       error: getConstraintError(field, 'maxLength'),
-      onUpdate: (value) =>
-        actions.updateTextFieldConstraints(field.id, { maxLength: value }),
+      onUpdate: (value) => actions.updateTextFieldConstraints(field.id, { maxLength: value }),
     },
   ]
 }
@@ -149,6 +158,40 @@ function createNumberSettings(
   ]
 }
 
+function getOptionErrors(field: SelectField | RadioField): Array<string | undefined> {
+  const result = formFieldSchema.safeParse(field)
+  const errors: Array<string | undefined> = []
+
+  if (result.success) return errors
+
+  result.error.issues.forEach((issue) => {
+    const [property, index, optionProperty] = issue.path
+
+    if (property === 'options' && typeof index === 'number' && optionProperty === 'label') {
+      errors[index] = issue.message
+    }
+  })
+
+  return errors
+}
+
+function createOptionsSetting(
+  field: SelectField | RadioField,
+  actions: PropertySettingActions
+): OptionsSetting {
+  return {
+    id: 'options',
+    label: '选项设置',
+    control: 'options',
+    options: field.options,
+    errors: getOptionErrors(field),
+    onAdd: () => actions.addFieldOption(field.id),
+    onUpdateLabel: (optionValue, label) =>
+      actions.updateFieldOptionLabel(field.id, optionValue, label),
+    onRemove: (optionValue) => actions.removeFieldOption(field.id, optionValue),
+  }
+}
+
 export function usePropertySettings(
   selectedField: Ref<FormField | null>,
   actions: PropertySettingActions
@@ -166,6 +209,10 @@ export function usePropertySettings(
 
     if (field.type === 'number') {
       return [...baseSettings, ...createNumberSettings(field, actions)]
+    }
+
+    if (field.type === 'select' || field.type === 'radio') {
+      return [...baseSettings, createOptionsSetting(field, actions)]
     }
 
     return baseSettings
