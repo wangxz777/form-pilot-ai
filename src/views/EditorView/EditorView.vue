@@ -6,10 +6,16 @@
       </div>
 
       <nav class="toolbar-actions" aria-label="表单操作">
-        <ElButton>预览</ElButton>
-        <ElButton>导入</ElButton>
+        <ElButton @click="openImportPicker">导入</ElButton>
         <ElButton>导出</ElButton>
         <ElButton type="primary">AI 生成</ElButton>
+        <input
+          ref="importInputRef"
+          class="import-input"
+          type="file"
+          accept=".json,application/json"
+          @change="handleImportFile"
+        />
       </nav>
     </header>
 
@@ -18,15 +24,80 @@
       <PreviewPanel />
       <PropertyPanel />
     </div>
+
+    <SchemaConfirmDialog
+      v-if="pendingSchema"
+      v-model="confirmDialogVisible"
+      :schema="pendingSchema"
+      @apply="applyPendingSchema"
+      @cancel="cancelPendingSchema"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ElButton } from 'element-plus'
+import { ref } from 'vue'
+import { ElButton, ElMessage } from 'element-plus'
 
 import PreviewPanel from './PreviewPanel.vue'
 import EditorPanel from './EditorPanel.vue'
 import PropertyPanel from './PropertyPanel.vue'
+import SchemaConfirmDialog from './SchemaConfirmDialog.vue'
+import { useFormEditorStore } from '@/stores/form-editor'
+import { parseFormSchemaJson } from '@/utils/form-schema-json'
+import type { FormSchema } from '@/types/form-schema'
+
+const formEditorStore = useFormEditorStore()
+const { replaceFormSchema } = formEditorStore
+const importInputRef = ref<HTMLInputElement | null>(null)
+const pendingSchema = ref<FormSchema | null>(null)
+const confirmDialogVisible = ref(false)
+
+function openImportPicker() {
+  importInputRef.value?.click()
+}
+
+async function handleImportFile(event: Event) {
+  const input = event.currentTarget
+  if (!(input instanceof HTMLInputElement)) return
+
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+
+  let source: string
+
+  try {
+    source = await file.text()
+  } catch {
+    ElMessage.error('文件读取失败')
+    return
+  }
+
+  const result = parseFormSchemaJson(source)
+
+  if (!result.success) {
+    ElMessage.error(result.message)
+    return
+  }
+
+  pendingSchema.value = result.data
+  confirmDialogVisible.value = true
+}
+
+function applyPendingSchema() {
+  if (!pendingSchema.value) return
+
+  replaceFormSchema(pendingSchema.value)
+  confirmDialogVisible.value = false
+  pendingSchema.value = null
+  ElMessage.success('表单已导入')
+}
+
+function cancelPendingSchema() {
+  confirmDialogVisible.value = false
+  pendingSchema.value = null
+}
 </script>
 
 <style scoped lang="scss">
@@ -49,6 +120,10 @@ import PropertyPanel from './PropertyPanel.vue'
 
 .editor-layout > :deep(.editor-panel) {
   background: #ffffff;
+}
+
+.import-input {
+  display: none;
 }
 
 @media (max-width: 1200px) {

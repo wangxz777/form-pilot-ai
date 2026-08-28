@@ -80,7 +80,7 @@ function createField(type: FormField['type']): FormField {
   }
 }
 export const useFormEditorStore = defineStore('formEditor', () => {
-  const formSchema = reactive<FormSchema>(jobApplicationSchema)
+  const formSchema = reactive<FormSchema>(structuredClone(jobApplicationSchema))
 
   const formValues = reactive<Record<string, FormValue>>(createFormValues(formSchema.fields))
 
@@ -96,6 +96,21 @@ export const useFormEditorStore = defineStore('formEditor', () => {
 
   function updateFormTitle(title: string) {
     formSchema.title = title
+  }
+
+  function replaceFormSchema(nextSchema: FormSchema) {
+    const schema = structuredClone(nextSchema)
+
+    formSchema.schemaVersion = schema.schemaVersion
+    formSchema.title = schema.title
+    formSchema.fields = schema.fields
+
+    Object.keys(formValues).forEach((fieldId) => {
+      delete formValues[fieldId]
+    })
+    Object.assign(formValues, createFormValues(schema.fields))
+
+    selectedFieldId.value = null
   }
 
   function selectField(fieldId: string) {
@@ -212,6 +227,7 @@ export const useFormEditorStore = defineStore('formEditor', () => {
     selectedField,
     updateFormValue,
     updateFormTitle,
+    replaceFormSchema,
     selectField,
     updateFieldProperties,
     updateTextFieldConstraints,

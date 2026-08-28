@@ -27,7 +27,7 @@
 - 修改：`src/stores/form-editor.test.ts`
 - 修改：`src/stores/form-editor.ts`
 
-- [ ] **步骤 1：编写 Store 替换契约测试**
+- [x] **步骤 1：编写 Store 替换契约测试**
 
 在 `src/stores/form-editor.test.ts` 增加一个测试，使用单个 checkbox 字段的新 Schema：
 
@@ -56,13 +56,13 @@ it('整体替换 Schema 时重建字段值并清空选中状态', () => {
 })
 ```
 
-- [ ] **步骤 2：运行 Store 测试确认失败**
+- [x] **步骤 2：运行 Store 测试确认失败**
 
 运行：`pnpm test -- src/stores/form-editor.test.ts`
 
 预期：FAIL，提示 `store.replaceFormSchema is not a function`。
 
-- [ ] **步骤 3：隔离初始数据并实现 replaceFormSchema**
+- [x] **步骤 3：隔离初始数据并实现 replaceFormSchema**
 
 Store 初始化时克隆静态示例，避免测试或运行时修改 `jobApplicationSchema` 模块对象：
 
@@ -91,13 +91,13 @@ function replaceFormSchema(nextSchema: FormSchema) {
 
 把 `replaceFormSchema` 加入 Store 返回对象。
 
-- [ ] **步骤 4：运行 Store 测试确认通过**
+- [x] **步骤 4：运行 Store 测试确认通过**
 
 运行：`pnpm test -- src/stores/form-editor.test.ts`
 
 预期：Store 测试通过，旧字段值不存在，新 checkbox 默认值为 `false`。
 
-- [ ] **步骤 5：提交 Store 原子替换能力**
+- [x] **步骤 5：提交 Store 原子替换能力**
 
 ```bash
 git add src/stores/form-editor.ts src/stores/form-editor.test.ts
@@ -110,7 +110,7 @@ git commit -m "feat: replace editor form schema"
 - 创建：`src/utils/form-schema-json.ts`
 - 创建：`src/utils/form-schema-json.test.ts`
 
-- [ ] **步骤 1：编写 JSON 导入边界测试**
+- [x] **步骤 1：编写 JSON 导入边界测试**
 
 ```ts
 import { describe, expect, it } from 'vitest'
@@ -138,13 +138,13 @@ describe('parseFormSchemaJson', () => {
 })
 ```
 
-- [ ] **步骤 2：运行纯函数测试确认失败**
+- [x] **步骤 2：运行纯函数测试确认失败**
 
 运行：`pnpm test -- src/utils/form-schema-json.test.ts`
 
 预期：FAIL，提示无法找到 `form-schema-json` 模块。
 
-- [ ] **步骤 3：实现可辨识的解析结果**
+- [x] **步骤 3：实现可辨识的解析结果**
 
 ```ts
 import { formSchema, type FormSchema } from '@/types/form-schema'
@@ -172,13 +172,13 @@ export function parseFormSchemaJson(source: string): ParseFormSchemaJsonResult {
 }
 ```
 
-- [ ] **步骤 4：运行纯函数测试确认通过**
+- [x] **步骤 4：运行纯函数测试确认通过**
 
 运行：`pnpm test -- src/utils/form-schema-json.test.ts`
 
 预期：合法 JSON 返回已收窄的 `FormSchema`，两个错误分支返回稳定中文消息。
 
-- [ ] **步骤 5：提交 JSON 解析边界**
+- [x] **步骤 5：提交 JSON 解析边界**
 
 ```bash
 git add src/utils/form-schema-json.ts src/utils/form-schema-json.test.ts
@@ -190,7 +190,7 @@ git commit -m "feat: validate imported form schema"
 **文件：**
 - 创建：`src/views/EditorView/SchemaConfirmDialog.vue`
 
-- [ ] **步骤 1：建立弹窗数据接口**
+- [x] **步骤 1：建立弹窗数据接口**
 
 ```ts
 import { computed } from 'vue'
@@ -210,7 +210,7 @@ const emit = defineEmits<{
 const previewValues = computed(() => createFormValues(props.schema.fields))
 ```
 
-- [ ] **步骤 2：渲染候选表单且不注册校验**
+- [x] **步骤 2：渲染候选表单且不注册校验**
 
 弹窗模板使用以下结构：
 
@@ -250,7 +250,7 @@ const previewValues = computed(() => createFormValues(props.schema.fields))
 
 不得为 `ElForm` 设置 `rules`，不得为 `ElFormItem` 设置 `prop` 或 `required`。
 
-- [ ] **步骤 3：加入不可交互和布局样式**
+- [x] **步骤 3：加入不可交互和布局样式**
 
 ```scss
 .confirmation-control {
@@ -275,13 +275,13 @@ const previewValues = computed(() => createFormValues(props.schema.fields))
 }
 ```
 
-- [ ] **步骤 4：运行生产构建验证组件类型**
+- [x] **步骤 4：运行生产构建验证组件类型**
 
 运行：`pnpm build`
 
 预期：`FormSchema` prop、`previewValues` 和 `FormFieldRenderer` 的 model 类型检查通过。
 
-- [ ] **步骤 5：提交确认弹窗**
+- [x] **步骤 5：提交确认弹窗**
 
 ```bash
 git add src/views/EditorView/SchemaConfirmDialog.vue
@@ -293,7 +293,7 @@ git commit -m "feat: add schema confirmation dialog"
 **文件：**
 - 修改：`src/views/EditorView/EditorView.vue`
 
-- [ ] **步骤 1：调整工具栏并增加隐藏文件输入**
+- [x] **步骤 1：调整工具栏并增加隐藏文件输入**
 
 将 `EditorView.vue` 的脚本依赖调整为：
 
@@ -323,7 +323,7 @@ import type { FormSchema } from '@/types/form-schema'
 />
 ```
 
-- [ ] **步骤 2：管理候选 Schema 与文件读取**
+- [x] **步骤 2：管理候选 Schema 与文件读取**
 
 ```ts
 const formEditorStore = useFormEditorStore()
@@ -356,7 +356,7 @@ async function handleImportFile(event: Event) {
 }
 ```
 
-- [ ] **步骤 3：接入确认弹窗的应用与取消事件**
+- [x] **步骤 3：接入确认弹窗的应用与取消事件**
 
 ```vue
 <SchemaConfirmDialog
@@ -384,7 +384,7 @@ function cancelPendingSchema() {
 }
 ```
 
-- [ ] **步骤 4：隐藏原生文件输入并保持响应式布局**
+- [x] **步骤 4：隐藏原生文件输入并保持响应式布局**
 
 ```scss
 .import-input {
@@ -392,13 +392,13 @@ function cancelPendingSchema() {
 }
 ```
 
-- [ ] **步骤 5：运行关键验证**
+- [x] **步骤 5：运行关键验证**
 
 运行：`pnpm test && pnpm build`
 
 预期：所有测试通过，生产构建成功；导入入口只把通过 Zod 的 Schema 交给确认弹窗。
 
-- [ ] **步骤 6：提交完整导入确认闭环**
+- [x] **步骤 6：提交完整导入确认闭环**
 
 ```bash
 git add src/views/EditorView/EditorView.vue

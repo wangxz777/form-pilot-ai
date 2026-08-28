@@ -58,6 +58,29 @@ describe('useFormEditorStore', () => {
     expect(JSON.stringify(store.formSchema.fields)).toBe(originalFields)
   })
 
+  it('整体替换 Schema 时重建字段值并清空选中状态', () => {
+    store.selectField(fieldId)
+    store.updateFormValue(fieldId, '旧值')
+
+    store.replaceFormSchema({
+      schemaVersion: 1,
+      title: '导入的确认表',
+      fields: [
+        {
+          id: 'confirmed',
+          type: 'checkbox',
+          label: '确认信息',
+          required: true,
+        },
+      ],
+    })
+
+    expect(store.formSchema.title).toBe('导入的确认表')
+    expect(store.formSchema.fields.map((field) => field.id)).toEqual(['confirmed'])
+    expect(store.formValues).toEqual({ confirmed: false })
+    expect(store.selectedFieldId).toBeNull()
+  })
+
   it('只为匹配的字段类型更新专属约束', () => {
     store.addField('text')
     const textField = store.formSchema.fields.at(-1)
