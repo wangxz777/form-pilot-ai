@@ -7,7 +7,7 @@
 
       <nav class="toolbar-actions" aria-label="表单操作">
         <ElButton @click="openImportPicker">导入</ElButton>
-        <ElButton>导出</ElButton>
+        <ElButton @click="exportFormSchema">导出</ElButton>
         <ElButton type="primary">AI 生成</ElButton>
         <input
           ref="importInputRef"
@@ -44,7 +44,7 @@ import EditorPanel from './EditorPanel.vue'
 import PropertyPanel from './PropertyPanel.vue'
 import SchemaConfirmDialog from './SchemaConfirmDialog.vue'
 import { useFormEditorStore } from '@/stores/form-editor'
-import { parseFormSchemaJson } from '@/utils/form-schema-json'
+import { parseFormSchemaJson, serializeFormSchemaJson } from '@/utils/form-schema-json'
 import type { FormSchema } from '@/types/form-schema'
 
 const formEditorStore = useFormEditorStore()
@@ -97,6 +97,28 @@ function applyPendingSchema() {
 function cancelPendingSchema() {
   confirmDialogVisible.value = false
   pendingSchema.value = null
+}
+
+function exportFormSchema() {
+  const result = serializeFormSchemaJson(formEditorStore.formSchema)
+
+  if (!result.success) {
+    ElMessage.error(result.message)
+    return
+  }
+
+  const file = new Blob([result.data], { type: 'application/json;charset=utf-8' })
+  const fileUrl = URL.createObjectURL(file)
+  const downloadLink = document.createElement('a')
+
+  downloadLink.href = fileUrl
+  downloadLink.download = 'formpilot-schema.json'
+  document.body.append(downloadLink)
+  downloadLink.click()
+  downloadLink.remove()
+  URL.revokeObjectURL(fileUrl)
+
+  ElMessage.success('表单已导出')
 }
 </script>
 
