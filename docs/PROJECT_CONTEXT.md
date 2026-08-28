@@ -110,19 +110,18 @@
 
 ## 当前实际进度
 
-截至 2026-08-27，整体进度约 **40%**：
+截至 2026-08-28，整体进度约 **55%**：
 
-- 第一周基础已完成：Vue Router、Pinia、Element Plus、Zod、Vitest 和编辑器页面骨架均已接入。
-- `src/types/form-schema.ts` 已定义 text、number、textarea、select、radio、checkbox、date 七类字段、`schemaVersion: 1`、选项约束、长度／范围关系及字段 ID 唯一性，并通过 `z.infer` 导出类型。
-- 已完成统一 `FormFieldRenderer` 与七个字段组件；字段值通过类型化 `v-model` 写入 Pinia 的 `formValues`。
-- `formSchema`、`formValues`、`selectedFieldId` 和派生的 `selectedField` 已集中到 `useFormEditorStore`，组件使用 `storeToRefs` 保持响应性，写入通过 action 完成。
-- 已完成 Schema 驱动的 Element Plus 规则适配：支持 required、minLength、maxLength、min、max；复选框必填只接受已勾选状态。
-- 编辑器三栏已按 `docs/ui` 参考图调整；字段支持选择、七类型弹窗新增、直接删除和拖拽排序，相关值与选中状态由 Store 同步维护。
-- 属性面板支持名称、必填、文本长度和数字范围编辑；公共属性与类型专属属性使用显式模板，通过 `field.type` 保持 TypeScript 类型收窄。
-- Element Plus 已移除全量组件注册，首页和编辑器使用路由懒加载；最大 JavaScript 产物约 396 kB，超过 500 kB 的构建警告已消失。
-- 当前分支为 `codex/formpilot-v1`；本阶段代码和文档将在今日收尾提交。
-- 最新验证为 `pnpm test` 16/16、`pnpm build` 成功。
-- 尚未实现约束关系的属性面板提示、select／radio 选项编辑、表单标题编辑、草稿、JSON 导入导出、AI 接口、部署和最终作品集文档。
+- 第一周基础和第二周字段编辑闭环已完成：七类 Zod Schema、动态渲染、Pinia 状态、字段新增／选择／删除／排序、标题编辑及字段属性编辑均已接入。
+- PropertyPanel 通过类型安全的 `usePropertySettings` 统一生成配置；支持名称、必填、文本长度、数字范围以及 select／radio 选项新增、编辑和删除，并显示关系或空选项错误。
+- PreviewPanel 已明确为设计画布：真实 Element Plus 控件保持正常外观但不可输入，字段支持点击高亮和拖拽排序，设计态不注册表单校验。
+- 七种字段类型共享同一份名称、说明和 SVG 图标元数据；添加弹窗、左侧列表和右侧属性摘要统一通过 `SvgIcon` 渲染 Element Plus 风格图标。
+- 顶部不再提供独立预览按钮；预览只用于 JSON 导入或未来 AI 生成后的候选 Schema 确认，取消不会修改当前 Store，应用后整体替换 Schema、重建默认值并清空选中状态。
+- 已完成本地 JSON 文件导入、Zod 校验、具体错误路径提示和 JSON 导出；非法 Schema 不会进入确认弹窗或被导出。
+- 已完成单份本地草稿：用户手动保存 Schema，进入编辑器时自动恢复；无草稿时保持默认表单，损坏草稿显示具体错误。
+- 当前分支为 `codex/formpilot-v1`，工作区干净。最新验证为 `pnpm test` 24/24、`pnpm build` 成功；最大编辑器 JavaScript 产物约 482 kB，没有超过 500 kB 的构建警告。
+- CodeGraph 已于 2026-08-28 按学习者要求同步，索引状态为最新。
+- 尚未实现真实 AI 接口、CloudBase 云函数、请求取消／重试、部署、最终作品集文档，以及最终用户填写／提交表单的独立入口。
 
 ## 当前开发边界
 
@@ -138,8 +137,8 @@
 
 ## 恢复开发时的起点
 
-1. 为文本长度和数字范围编辑增加关系校验与可见错误提示，避免最小值大于最大值。
-2. 为 select／radio 字段实现选项新增、编辑和删除，同时保证至少保留一个合法选项。
-3. 完成表单标题编辑，使顶部标题与预览标题保持同步。
-4. 第 2 周字段编辑闭环稳定后，进入单份草稿和 JSON 导入导出。
-5. 在关键行为稳定后由 Codex 补充少量回归测试，并运行 `pnpm test` 与 `pnpm build`。
+1. 先确认 AI 第一版直接接入“CloudBase 云函数 + 真实百炼 API”，还是先实现相同契约的本地模拟服务。
+2. 明确服务端 `POST /generate-form` 请求／响应契约，API Key 只存在服务端环境变量中。
+3. AI 返回值必须通过现有 `formSchema.safeParse`；成功后复用 `SchemaConfirmDialog`，用户应用前不得写入当前 Store。
+4. 按最小闭环处理加载、错误、取消和重试，不实现 AI 定点修改或对话历史。
+5. AI 闭环稳定后，补最终用户填写／提交入口的范围决策，并进入部署和作品集文档阶段。

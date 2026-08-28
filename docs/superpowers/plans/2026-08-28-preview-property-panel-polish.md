@@ -182,4 +182,9 @@ expect(settings.value.map((setting) => setting.id)).toEqual([
 
 预期：现有测试全部通过，生产构建成功。
 
-实现代码在用户检查前保持未提交；用户明确要求后再提交。
+## 实施结果（2026-08-28）
+
+- 预览画布移除校验和宽度上限，属性面板隐藏字段 ID／类型输入项，并接入共享字段摘要和七种本地 SVG 图标。
+- 未新增运行时依赖，`form-rules.ts` 保留给未来真实填写／提交场景。
+- 实现已提交为 `5b7608c feat: polish preview and property panel`。
+- 日终验证为 `pnpm test` 24/24 通过、`pnpm build` 成功，最大编辑器 JavaScript 产物约 482 kB。

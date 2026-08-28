@@ -330,5 +330,6 @@ pnpm build
 - settings 使用 `control` 可辨识联合，直接携带已解析值和 Store action 回调，没有恢复动态字段索引。
 - 已将 PreviewPanel 调整为非填写设计画布，真实控件通过 `inert` 和交互隔离样式保持正常外观但不可操作。
 - PreviewPanel 字段外层已接入点击／键盘选中、高亮和 `moveField` 拖拽排序。
-- 新增组合式函数与 PreviewPanel 两个高价值测试文件；最终 `pnpm test` 19/19 通过，`pnpm build` 成功，最大 JavaScript chunk 约 466 kB。
-- 实现代码保持未提交，等待学习者审查。
+- 新增组合式函数与 PreviewPanel 两个高价值测试文件；初始画布实现提交为 `7ee5766 feat: add editor preview canvas`。
+- 选项编辑、标题和布局扩展提交为 `7d35f97 feat: 完善字段配置与编辑画布`，后续画布／属性面板优化提交为 `5b7608c feat: polish preview and property panel`。
+- 日终验证为 `pnpm test` 24/24 通过、`pnpm build` 成功，最大编辑器 JavaScript 产物约 482 kB。

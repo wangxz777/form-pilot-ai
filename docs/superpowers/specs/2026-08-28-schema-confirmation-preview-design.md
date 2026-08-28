@@ -109,3 +109,11 @@ function replaceFormSchema(nextSchema: FormSchema) {
 - 不实现字段级合并。
 - 不保留导入前后的历史快照。
 - 不让确认弹窗直接操作 Pinia Store。
+
+## 实施结果（2026-08-28）
+
+- JSON 导入、候选 Schema 临时状态和确认／取消数据流已按设计落地，提交为 `9111552 feat: confirm imported form schema`。
+- Schema 错误提示在设计基础上补充为“具体路径 + 首条原因 + 剩余问题数量”，仍由 Zod 作为唯一运行时边界。
+- JSON 导出已作为不经过确认弹窗的独立切片完成，提交为 `d3c530e feat: export validated form schema`。
+- 单份本地草稿随后完成：手动保存、进入编辑器自动恢复，恢复时不打开确认弹窗；这一扩展保持了确认预览只服务导入和未来 AI 生成的边界。
+- AI 生成接入仍未实现，后续直接复用同一候选 Schema 确认入口。

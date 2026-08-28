@@ -200,3 +200,10 @@ selectedField[setting.value]
 - 本批次不修改字段 Schema 结构。
 - 本批次不拆分 PropertyPanel 的 Vue 子组件。
 - 本批次不新增依赖。
+
+## 实施结果与后续扩展（2026-08-28）
+
+- 类型安全 settings 和不可填写设计画布按本设计落地，初始提交为 `7ee5766 feat: add editor preview canvas`。
+- 当日后续需求扩展了本设计的非目标：select／radio 选项编辑已加入同一 settings 配置体系，仍未拆分新的 Vue 子组件，提交为 `7d35f97`。
+- PreviewPanel 随后进一步移除设计态校验并改为全宽；属性面板隐藏字段 ID／类型设置并加入共享字段摘要，提交为 `5b7608c`。
+- 真实填写／提交模式仍未实现，现有 `formValues` 和 `form-rules.ts` 继续保留给后续独立入口。
