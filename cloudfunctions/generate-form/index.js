@@ -13,19 +13,6 @@ function sendJson(response, statusCode, data) {
   response.end(JSON.stringify(data))
 }
 
-function applyCorsHeaders(request, response, env) {
-  const allowedOrigin = env.ALLOWED_ORIGIN?.trim() || '*'
-  const requestOrigin = request.headers.origin
-
-  if (allowedOrigin === '*' || requestOrigin === allowedOrigin) {
-    response.setHeader('Access-Control-Allow-Origin', allowedOrigin)
-  }
-
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  response.setHeader('Vary', 'Origin')
-}
-
 async function readRequestBody(request) {
   const chunks = []
   let size = 0
@@ -67,11 +54,8 @@ function readPrompt(body) {
 
 export function createRequestHandler({
   generateFormSchema = createFormSchemaGenerator(),
-  env = process.env,
 } = {}) {
   return async function requestHandler(request, response) {
-    applyCorsHeaders(request, response, env)
-
     if (request.method === 'OPTIONS') {
       response.writeHead(204)
       response.end()

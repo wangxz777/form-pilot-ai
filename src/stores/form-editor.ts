@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, toRaw } from 'vue'
 
 import type {
   FormSchema,
@@ -99,7 +99,7 @@ export const useFormEditorStore = defineStore('formEditor', () => {
   }
 
   function replaceFormSchema(nextSchema: FormSchema) {
-    const schema = structuredClone(nextSchema)
+    const schema = structuredClone(toRaw(nextSchema))
 
     formSchema.schemaVersion = schema.schemaVersion
     formSchema.title = schema.title

@@ -1,9 +1,10 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { reactive } from 'vue'
 
 import { useFormEditorStore } from './form-editor'
 import { formSchema } from '@/types/form-schema'
-import type { FormField } from '@/types/form-schema'
+import type { FormField, FormSchema } from '@/types/form-schema'
 
 describe('useFormEditorStore', () => {
   let store: ReturnType<typeof useFormEditorStore>
@@ -62,7 +63,7 @@ describe('useFormEditorStore', () => {
     store.selectField(fieldId)
     store.updateFormValue(fieldId, '旧值')
 
-    store.replaceFormSchema({
+    const nextSchema = reactive<FormSchema>({
       schemaVersion: 1,
       title: '导入的确认表',
       fields: [
@@ -74,6 +75,7 @@ describe('useFormEditorStore', () => {
         },
       ],
     })
+    store.replaceFormSchema(nextSchema)
 
     expect(store.formSchema.title).toBe('导入的确认表')
     expect(store.formSchema.fields.map((field) => field.id)).toEqual(['confirmed'])

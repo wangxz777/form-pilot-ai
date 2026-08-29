@@ -32,7 +32,6 @@ Content-Type: application/json
 | `DASHSCOPE_API_KEY` | 是 | 百炼 API Key，只配置在云函数环境中 |
 | `DASHSCOPE_BASE_URL` | 是 | 百炼 OpenAI 兼容接口 Base URL |
 | `DASHSCOPE_MODEL` | 否 | 默认 `qwen3.8-flash` |
-| `ALLOWED_ORIGIN` | 否 | 允许跨域访问的前端 Origin；未配置时为 `*` |
 
 北京业务空间的 Base URL：
 
@@ -64,6 +63,7 @@ node index.js
 - 函数超时时间应大于百炼请求的 45 秒超时
 - `cloudbaserc.json` 会把网关路径 `/generate-form` 关联到该函数
 - 不设置 `public: true`；新环境的空 Rego 策略会导致 CLI 自动开放匿名访问失败，HTTP 路由使用默认的 `enableAuth: false`
+- 跨域响应头由 CloudBase 网关统一添加，云函数不要重复设置 `Access-Control-Allow-Origin`
 - 当前线上路由限制总 QPS 为 20，并按客户端 IP 限制为每秒 2 次；浏览器收到 `429` 时应提示稍后重试
 
 项目根目录执行：

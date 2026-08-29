@@ -6,7 +6,7 @@ import { createFormSchemaGenerator, FormGenerationError } from './generate-form.
 import { createGenerateFormServer } from './index.js'
 
 async function startTestServer(t, generateFormSchema) {
-  const server = createGenerateFormServer({ generateFormSchema, env: {} })
+  const server = createGenerateFormServer({ generateFormSchema })
   server.listen(0, '127.0.0.1')
   await once(server, 'listening')
 
@@ -76,6 +76,7 @@ test('本地路径和网关转发根路径都会返回生成的 Schema', async (
     })
 
     assert.equal(response.status, 200)
+    assert.equal(response.headers.get('access-control-allow-origin'), null)
     assert.deepEqual(await response.json(), { schema: expectedSchema })
   }
 
