@@ -1,7 +1,7 @@
 <template>
   <ElDialog
     v-model="visible"
-    title="确认导入表单"
+    :title="dialogTitle"
     width="min(720px, calc(100vw - 32px))"
     destroy-on-close
     @closed="emit('cancel')"
@@ -42,7 +42,13 @@ import FormFieldRenderer from '@/components/formRenderer/FormFieldRenderer.vue'
 import { createFormValues } from '@/utils/form-values'
 import type { FormSchema } from '@/types/form-schema'
 
-const props = defineProps<{ schema: FormSchema }>()
+const props = withDefaults(
+  defineProps<{
+    schema: FormSchema
+    dialogTitle?: string
+  }>(),
+  { dialogTitle: '确认表单' }
+)
 const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{
   apply: []

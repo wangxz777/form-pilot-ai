@@ -29,16 +29,8 @@ function formatSchemaIssues(issues: readonly SchemaIssue[]): string {
   return `表单结构不符合要求：${issuePath || '根节点'}：${firstIssue.message}${remainingMessage}`
 }
 
-export function parseFormSchemaJson(source: string): ParseFormSchemaJsonResult {
-  let parsedValue: unknown
-
-  try {
-    parsedValue = JSON.parse(source)
-  } catch {
-    return { success: false, message: 'JSON 格式错误' }
-  }
-
-  const result = formSchema.safeParse(parsedValue)
+export function parseFormSchemaValue(value: unknown): ParseFormSchemaJsonResult {
+  const result = formSchema.safeParse(value)
 
   if (!result.success) {
     return {
@@ -48,6 +40,18 @@ export function parseFormSchemaJson(source: string): ParseFormSchemaJsonResult {
   }
 
   return { success: true, data: result.data }
+}
+
+export function parseFormSchemaJson(source: string): ParseFormSchemaJsonResult {
+  let parsedValue: unknown
+
+  try {
+    parsedValue = JSON.parse(source)
+  } catch {
+    return { success: false, message: 'JSON 格式错误' }
+  }
+
+  return parseFormSchemaValue(parsedValue)
 }
 
 export function serializeFormSchemaJson(schema: FormSchema): SerializeFormSchemaJsonResult {

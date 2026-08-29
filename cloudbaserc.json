@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "form-pilot-ai-d6g3opa0t18bca732",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "generate-form",
+      "type": "HTTP",
+      "runtime": "Nodejs20.19",
+      "timeout": 60,
+      "memorySize": 256,
+      "installDependency": false,
+      "gatewayPath": "/generate-form",
+      "envVariables": {
+        "DASHSCOPE_API_KEY": "{{env.DASHSCOPE_API_KEY}}",
+        "DASHSCOPE_BASE_URL": "https://ws-h4lw3w055gewflh0.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+        "DASHSCOPE_MODEL": "qwen3.8-flash"
+      },
+      "ignore": [
+        ".env*",
+        "*.node-test.js",
+        "README.md"
+      ]
+    }
+  ]
+}

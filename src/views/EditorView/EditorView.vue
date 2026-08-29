@@ -9,7 +9,7 @@
         <ElButton @click="saveDraft">保存草稿</ElButton>
         <ElButton @click="openImportPicker">导入</ElButton>
         <ElButton @click="exportFormSchema">导出</ElButton>
-        <ElButton type="primary">AI 生成</ElButton>
+        <ElButton type="primary" @click="aiDialogVisible = true">AI 生成</ElButton>
         <input
           ref="importInputRef"
           class="import-input"
@@ -26,10 +26,18 @@
       <PropertyPanel />
     </div>
 
+    <AiGenerateDialog
+      v-model="aiDialogVisible"
+      :loading="aiGenerating"
+      @generate="generateWithAi"
+      @cancel="cancelAiGeneration"
+    />
+
     <SchemaConfirmDialog
       v-if="pendingSchema"
       v-model="confirmDialogVisible"
       :schema="pendingSchema"
+      :dialog-title="pendingSource === 'ai' ? '确认 AI 生成表单' : '确认导入表单'"
       @apply="applyPendingSchema"
       @cancel="cancelPendingSchema"
     />
@@ -43,7 +51,9 @@ import { ElButton, ElMessage } from 'element-plus'
 import PreviewPanel from './PreviewPanel.vue'
 import EditorPanel from './EditorPanel.vue'
 import PropertyPanel from './PropertyPanel.vue'
+import AiGenerateDialog from './AiGenerateDialog.vue'
 import SchemaConfirmDialog from './SchemaConfirmDialog.vue'
+import { requestGeneratedForm } from '@/services/form-generator'
 import { useFormEditorStore } from '@/stores/form-editor'
 import { loadFormDraft, saveFormDraft } from '@/utils/form-draft'
 import { parseFormSchemaJson, serializeFormSchemaJson } from '@/utils/form-schema-json'
@@ -53,7 +63,11 @@ const formEditorStore = useFormEditorStore()
 const { replaceFormSchema } = formEditorStore
 const importInputRef = ref<HTMLInputElement | null>(null)
 const pendingSchema = ref<FormSchema | null>(null)
+const pendingSource = ref<'import' | 'ai'>('import')
 const confirmDialogVisible = ref(false)
+const aiDialogVisible = ref(false)
+const aiGenerating = ref(false)
+let aiRequestController: AbortController | null = null
 
 function openImportPicker() {
   importInputRef.value?.click()
@@ -83,22 +97,58 @@ async function handleImportFile(event: Event) {
     return
   }
 
+  pendingSource.value = 'import'
   pendingSchema.value = result.data
   confirmDialogVisible.value = true
+}
+
+async function generateWithAi(prompt: string) {
+  aiRequestController?.abort()
+
+  const controller = new AbortController()
+  aiRequestController = controller
+  aiGenerating.value = true
+
+  const result = await requestGeneratedForm(prompt, { signal: controller.signal })
+
+  if (controller.signal.aborted) return
+
+  if (!result.success) {
+    ElMessage.error(result.message)
+    aiGenerating.value = false
+    aiRequestController = null
+    return
+  }
+
+  pendingSource.value = 'ai'
+  pendingSchema.value = result.data
+  aiDialogVisible.value = false
+  confirmDialogVisible.value = true
+  aiGenerating.value = false
+  aiRequestController = null
+}
+
+function cancelAiGeneration() {
+  aiRequestController?.abort()
+  aiRequestController = null
+  aiGenerating.value = false
 }
 
 function applyPendingSchema() {
   if (!pendingSchema.value) return
 
+  const appliedSource = pendingSource.value
   replaceFormSchema(pendingSchema.value)
   confirmDialogVisible.value = false
   pendingSchema.value = null
-  ElMessage.success('表单已导入')
+  pendingSource.value = 'import'
+  ElMessage.success(appliedSource === 'ai' ? 'AI 表单已应用' : '表单已导入')
 }
 
 function cancelPendingSchema() {
   confirmDialogVisible.value = false
   pendingSchema.value = null
+  pendingSource.value = 'import'
 }
 
 function exportFormSchema() {
