@@ -21,10 +21,18 @@ async function startTestServer(t, generateFormSchema) {
 test('百炼请求使用严格 JSON Schema 并解析生成结果', async () => {
   let requestUrl = ''
   let requestInit
+  const generatedSchema = {
+    schemaVersion: 1,
+    title: '活动报名表',
+    fields: [
+      { id: 'email', type: 'text', label: '邮箱' },
+      { id: 'email', type: 'text', label: '邮箱' },
+    ],
+  }
   const expectedSchema = {
     schemaVersion: 1,
     title: '活动报名表',
-    fields: [],
+    fields: [{ id: 'email', type: 'text', label: '邮箱' }],
   }
   const generateFormSchema = createFormSchemaGenerator({
     env: {
@@ -38,7 +46,7 @@ test('百炼请求使用严格 JSON Schema 并解析生成结果', async () => {
 
       return new Response(
         JSON.stringify({
-          choices: [{ message: { content: JSON.stringify(expectedSchema) } }],
+          choices: [{ message: { content: JSON.stringify(generatedSchema) } }],
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       )

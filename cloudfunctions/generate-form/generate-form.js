@@ -11,7 +11,8 @@ const SYSTEM_PROMPT = `你是 FormPilot AI 的表单设计助手。
 3. label 和 title 使用简洁、自然的中文。
 4. select 和 radio 至少提供一个选项，且同一字段内 option.value 唯一。
 5. minLength 不得大于 maxLength，min 不得大于 max。
-6. 只在用户需求明确时添加长度或数字范围限制，不要擅自增加字段。`
+6. 只在用户需求明确时添加长度或数字范围限制，不要擅自增加字段。
+7. 每个业务字段只生成一次；用户明确要求一个字段时，fields 只能包含一个元素。`
 
 export class FormGenerationError extends Error {
   constructor(message, statusCode) {
@@ -52,7 +53,20 @@ function readSchemaFromCompletion(completion) {
     throw new FormGenerationError('AI 返回的表单结构无效', 502)
   }
 
-  return schema
+  if (!Array.isArray(schema.fields)) return schema
+
+  const fieldIds = new Set()
+  const fields = schema.fields.filter((field) => {
+    const fieldId = field?.id
+
+    if (typeof fieldId !== 'string') return true
+    if (fieldIds.has(fieldId)) return false
+
+    fieldIds.add(fieldId)
+    return true
+  })
+
+  return { ...schema, fields }
 }
 
 export function createFormSchemaGenerator({ fetchImpl = globalThis.fetch, env = process.env } = {}) {
