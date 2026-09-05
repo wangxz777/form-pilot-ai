@@ -2,9 +2,9 @@
 
 ## 当前总体进度
 
-**55%**（截至 2026-08-28）
+**75%**（截至 2026-09-05）
 
-已完成应用骨架、Zod Schema、七类字段渲染器、主要字段编辑、候选 Schema 确认、JSON 导入导出和单份本地草稿；真实 AI、最终填写入口和部署尚未开始。该百分比按六周 V1 里程碑估算，每天总结时根据实际验收结果更新。
+已完成应用骨架、七类字段渲染与编辑、候选 Schema 确认、JSON 导入导出、单份本地草稿、真实百炼 AI 闭环、CloudBase 云函数和前端静态托管。最终填写入口按当前决策暂不实现；剩余工作集中在上线集成修复、视觉收口、README 和作品集材料。该百分比按六周 V1 里程碑估算，每天总结时根据实际验收结果更新。
 
 ## 使用方法
 
@@ -343,6 +343,83 @@
 
 - 先确认 AI 第一版使用真实的“CloudBase 云函数 + 百炼 API”，还是先实现相同契约的本地模拟服务。
 - 随后设计 `POST /generate-form` 的最小请求／响应契约，确保 API Key 只保存在服务端环境变量中，并复用现有 Zod 校验与确认弹窗。
+
+---
+
+## Day 7 — 2026-08-29 至 2026-09-05（AI 接入与上线）
+
+### 总体进度
+
+**75%**
+
+### 今日目标
+
+- 通过 CloudBase HTTP 云函数接入真实百炼结构化输出。
+- 复用候选 Schema 确认流程完成 AI 生成、取消、错误和确认应用闭环。
+- 将 Vue/Vite SPA 部署到 CloudBase 静态托管并完成生产域名联调。
+
+### 完成情况
+
+- 新增 `generate-form` Node.js HTTP 云函数，使用服务端环境变量保存百炼 API Key，通过兼容 Chat Completions 接口和 strict JSON Schema 生成七类字段 Schema。
+- 前端新增 AI 生成对话框和请求服务；成功结果先通过 Zod 校验，再进入确认弹窗，确认后才整体替换 Store。
+- 修复 CloudBase 网关与云函数重复添加 CORS 响应头的问题；跨域响应头改由网关统一负责。
+- 修复候选 Schema 进入 Vue `ref` 后成为 Proxy，导致 `structuredClone` 抛出 `DataCloneError` 的问题；Store 先通过 `toRaw` 取得原始对象，再执行深拷贝。
+- 针对百炼曾把同一字段重复填满 `maxItems` 的真实结果，强化生成提示并在云函数按字段 `id` 去重。
+- 部署 CloudBase 网关路由 `/generate-form`，保持匿名 HTTP 访问，并设置总 QPS 20、单客户端 IP 每秒 2 次的限流。
+- 将 `dist` 安全部署到 CloudBase 静态托管；保留环境原有的 `__auth` 与 `cloud-admin` 文件，没有使用 `--prune`。
+- 为 Vue Router history 模式配置 `index.html` 错误文档，并关闭原始错误状态，使 `/editor` 直接访问与刷新返回 SPA 页面和 HTTP 200。
+- 当前决策：暂不实现最终用户填写／提交入口。
+
+### 验证结果
+
+- `pnpm test:cloud-function`：4/4 通过。
+- `pnpm test`：8 个测试文件、26/26 通过。
+- `pnpm build`：成功，CloudBase 静态托管发布后一致性校验通过。
+- 真实百炼请求成功；“生成一个邮箱字段的联系表”最终返回 1 个 `email` 字段。
+- 线上 `/` 与 `/editor` 均返回 HTTP 200 和 Vue 应用入口，主 JavaScript 资源返回 HTTP 200。
+- 生产前端域名到 AI 网关的预检返回 204；业务请求的 CORS Origin 与生产域名一致。
+- 限流验证使用不会调用百炼的空提示词请求，结果为两次 400、三次 429，证明单 IP 2 QPS 生效。
+- 关键提交：`90dbc9d`、`f2f3c3e`、`bea3b84`。
+
+### 前端上线难点和提示
+
+1. **先盘点远端文件，再决定是否清理。** 静态托管根目录已有 CloudBase 认证和管理页面；直接使用 `--prune` 会删除不属于本次 `dist` 的文件。本次先运行 `tcb hosting list --json`，确认内容后采用 `--safe --verify` 上传，不执行远端清理。
+2. **History 路由需要服务端回退。** Vue Router 使用 `createWebHistory` 时，云端并不存在真实的 `/editor` 文件。只上传 `index.html` 会导致子路由刷新返回 404；必须将错误文档指向 `index.html`，并将 `OriginalHttpStatus` 配置为 `Disabled`，才能让直接访问 `/editor` 返回 200。
+3. **不能只验证首页。** 首页 200 只能证明 `index.html` 存在；上线验收至少要分别检查 `/`、`/editor` 和 HTML 引用的哈希 JavaScript 资源，并确认响应内容包含 Vue 挂载节点。
+4. **CORS 只能有一个负责方。** CloudBase 网关会生成跨域响应头，云函数再次写入 `Access-Control-Allow-Origin: *` 会合并成非法的多值响应，浏览器最终表现为“AI 服务连接失败”。本项目由网关统一处理 CORS，云函数不再重复设置。
+5. **用生产 Origin 做预检。** 本地 `http://localhost:5173` 能调用接口，不代表部署域名一定可以。发布后应使用真实静态托管域名发送 OPTIONS 和 POST 请求，分别检查状态码及 `Access-Control-Allow-Origin`。
+6. **函数部署可能重建网关路由。** `tcb fn deploy` 完成后需要重新检查限流；本次部署会清掉通过命令增量配置的低 QPS 策略，因此每次函数发布后都要重新应用并验证单 IP 限流。
+7. **注意 CDN 缓存。** 发布后验证应添加随机查询参数或 `Cache-Control: no-cache`，否则可能看到旧版 `index.html`，误以为上传没有生效。
+8. **密钥只在服务端。** 百炼 Key 使用 CloudBase 云函数环境变量，前端只保存公开接口地址；`.env` 被 Git 忽略，`.env.example` 只保留占位符。
+
+### 可重复执行的上线顺序
+
+```bash
+# 1. 类型检查并构建生产产物
+pnpm build
+
+# 2. 查看远端已有文件，禁止未经确认直接 prune
+pnpm dlx --package @cloudbase/cli tcb hosting list --json
+
+# 3. 安全上传并校验，最后上传入口文件
+pnpm dlx --package @cloudbase/cli tcb hosting deploy ./dist \
+  --safe --verify --entry index.html
+
+# 4. 查看静态托管状态和线上域名
+pnpm dlx --package @cloudbase/cli tcb hosting detail --json
+```
+
+CloudBase CLI 包含 `tcb`、`cloudbase`、`cloudbase-mcp` 多个二进制，不能直接执行 `pnpm dlx @cloudbase/cli`；应使用 `pnpm dlx --package @cloudbase/cli tcb ...` 明确选择 `tcb`。
+
+### 学习与问题
+
+- 关键结论：前端上线不是“构建后上传”一个动作，而是构建、远端资源保护、SPA 路由、CDN 缓存、生产 CORS 与接口限流组成的一条交付链路。
+- 仍需巩固：静态托管错误文档为什么能把 URL 解析权交回 Vue Router，以及 CORS 预检与正式 POST 响应为什么都必须合法。以上尚未通过学习者复述确认掌握。
+
+### 下一步
+
+- 完成上线后的集成修复和视觉收口。
+- 将根目录模板 README 改为作品级 README，记录架构、数据流、安全边界、部署方式和项目取舍。
 
 ---
 
